@@ -79,7 +79,7 @@
                     localStorage.setItem('userType', data.userType);
                     localStorage.setItem('userName', data.name);
                     
-                    window.location.href = '/frontend/index.html';
+                    window.location.href = '/frontend/dashboard.html';
                 } else {
                     showError(data.message);
                 }
@@ -127,7 +127,7 @@
             if (response.ok) {
                 localStorage.setItem('userType', data.userType);
                 localStorage.setItem('userName', data.name);
-                window.location.href = './dashboard.html';
+                window.location.href = '/frontend/dashboard.html';
             } else {
                 showError(data.message);
             }
