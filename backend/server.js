@@ -180,9 +180,12 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
+const path = require('path');
+
 app.get('/', function(req, res) {
-    res.sendFile(('/frontend/index.html'));
-  });
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
+
   
 
 const PORT = process.env.PORT || 3000;
