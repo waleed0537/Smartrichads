@@ -181,9 +181,10 @@ app.post('/api/logout', (req, res) => {
 });
 
 
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname, '..' , 'frontend'));
+    res.sendFile(path.join(__dirname, '..' , 'frontend', 'index.html'));
 });
 
   
