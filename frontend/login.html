@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Richads</title>
+    <link rel="stylesheet" href="./css/auth-styles.css">
+</head>
+<body>
+    <div class="stars">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1>Log In to Richads</h1>
+                <p class="subtitle">Welcome back! Please enter your details.</p>
+
+                <div class="user-type-toggle">
+                    <button class="toggle-btn active" data-type="affiliate">As Affiliate</button>
+                    <button class="toggle-btn" data-type="advertiser">As Advertiser</button>
+                </div>
+
+                <form class="auth-form" id="loginForm">
+                    <div class="error-label" id="errorLabel"></div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                    </div>
+                
+                    <button type="submit" class="submit-btn">Log In</button>
+                </form>
+
+                <p class="switch-auth">
+                    Don't have an account? <a href="signup.html">Sign Up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle button functionality
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userType = document.querySelector('.toggle-btn.active').dataset.type;
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                userType: userType
+            };
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store user type in localStorage for frontend use
+                    localStorage.setItem('userType', data.userType);
+                    localStorage.setItem('userName', data.name);
+                    
+                    window.location.href = '/frontend/index.html';
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('An error occurred during login');
+            }
+        });
+        function showError(message) {
+        const errorLabel = document.getElementById('errorLabel');
+        errorLabel.textContent = message;
+        errorLabel.classList.add('show');
+        
+        // Hide error after 5 seconds
+        setTimeout(() => {
+            errorLabel.classList.remove('show');
+        }, 5000);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userType = document.querySelector('.toggle-btn.active').dataset.type;
+        const errorLabel = document.getElementById('errorLabel');
+        errorLabel.classList.remove('show'); // Clear any existing error
+        
+        const formData = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            userType: userType
+        };
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData),
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                localStorage.setItem('userType', data.userType);
+                localStorage.setItem('userName', data.name);
+                window.location.href = '/index.html';
+            } else {
+                showError(data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showError('An error occurred. Please try again.');
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Richads</title>
+    <link rel="stylesheet" href="./css/auth-styles.css">
+</head>
+<body>
+    <div class="stars">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1>Sign Up to Richads</h1>
+                <p class="subtitle">Create your account to get started.</p>
+
+                <div class="user-type-toggle">
+                    <button class="toggle-btn active" data-type="affiliate">As Affiliate</button>
+                    <button class="toggle-btn" data-type="advertiser">As Advertiser</button>
+                </div>
+
+                <form class="auth-form" id="signupForm">
+                    <div class="error-label" id="errorLabel"></div>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required 
+                               placeholder="Create a password" minlength="6">
+                    </div>
+
+                    <button type="submit" class="submit-btn">Sign Up</button>
+                </form>
+
+                <p class="switch-auth">
+                    Already have an account? <a href="login.html">Log In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showError(message) {
+        const errorLabel = document.getElementById('errorLabel');
+        errorLabel.textContent = message;
+        errorLabel.classList.add('show');
+        
+        setTimeout(() => {
+            errorLabel.classList.remove('show');
+        }, 5000);
+    }
+
+        // Toggle button functionality
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Form submission
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userType = document.querySelector('.toggle-btn.active').dataset.type;
+        const errorLabel = document.getElementById('errorLabel');
+        errorLabel.classList.remove('show');
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                userType: userType
+            };
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showError(data.message);
+                    window.location.href = '/frontend/login.html';
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError(data.message);
+            }
+        });
+        
+    </script>
+</body>
+</html>
