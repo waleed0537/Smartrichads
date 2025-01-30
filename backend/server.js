@@ -180,8 +180,14 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname, '/frontend/index.html'));
+  });
+  
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log('Running at: ' + 'http://localhost:3000/frontend/index.html');
 });
+
