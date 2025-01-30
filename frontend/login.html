@@ -127,7 +127,7 @@
             if (response.ok) {
                 localStorage.setItem('userType', data.userType);
                 localStorage.setItem('userName', data.name);
-                window.location.href = '/index.html';
+                window.location.href = './dashboard.html';
             } else {
                 showError(data.message);
             }

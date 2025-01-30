@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Richads</title>
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" aria-label="Toggle menu" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <img src="logo.png" alt="Logo">
+                <button class="close-menu" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            
+            <nav class="nav-menu">
+                <ul>
+                    <li class="active">
+                        <a href="#offers">
+                            <i class="fa-solid fa-box"></i>
+                            <span>Offers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#statistics">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Statistics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#add-funds">
+                            <i class="fa-solid fa-wallet"></i>
+                            <span>Add Funds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#finances">
+                            <i class="fa-solid fa-coins"></i>
+                            <span>Finances</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#settings">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="logout-section">
+                    <a href="#logout" class="logout-link">
+                        <i class="fa-solid fa-sign-out-alt"></i>
+                        <span>Log out</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-nav">
+                <h1>Offers</h1>
+                <div class="header-actions">
+                    <div class="balance">
+                        <span class="balance-label">Balance</span>
+                        <span class="balance-amount">$ 0</span>
+                    </div>
+                    <button class="add-funds-button" onclick="togglePaymentForm()">Add funds</button>
+                    <button class="icon-button"><i class="fa-solid fa-bell"></i></button>
+                    <button class="icon-button"><i class="fa-solid fa-search"></i></button>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <!-- No Offers State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="megaphone-icon">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <h2>No offers yet</h2>
+                    <p>To add an offer, contact your manager</p>
+                </div>
+
+                <!-- Payment Form -->
+                <div class="payment-form hidden" id="paymentForm">
+                    <div class="payment-form-header">
+                        <h2>Add Funds</h2>
+                    </div>
+                    <form onsubmit="event.preventDefault();" class="payment-form-content">
+                        <div class="payment-methods">
+                            <button type="button" class="payment-method active" onclick="selectPaymentMethod('stripe')">
+                                <i class="fa-brands fa-stripe"></i>
+                                <span>Stripe</span>
+                            </button>
+                            <button type="button" class="payment-method" onclick="selectPaymentMethod('paypal')">
+                                <i class="fa-brands fa-paypal"></i>
+                                <span>PayPal</span>
+                            </button>
+                        </div>
+
+                        <div class="form-section stripe-section">
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" placeholder="1234 5678 9012 3456" maxlength="19">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Expiry Date</label>
+                                    <input type="text" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="form-group">
+                                    <label>CVC</label>
+                                    <input type="text" placeholder="123" maxlength="3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section paypal-section hidden">
+                            <div class="form-group">
+                                <label>PayPal Email</label>
+                                <input type="email" placeholder="your@email.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" placeholder="Enter amount" min="1" step="1">
+                        </div>
+
+                        <button type="submit" class="submit-button">Proceed to Payment</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize variables
+        let currentView = 'offers';  // Track current view state
+        
+        // Toggle sidebar function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            
+            sidebar.classList.toggle('active');
+            body.classList.toggle('menu-open');
+            
+            // Create overlay if it doesn't exist
+            let overlay = document.getElementById('mobileOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'mobileOverlay';
+                overlay.className = 'mobile-overlay';
+                overlay.onclick = toggleSidebar;
+                document.body.appendChild(overlay);
+            }
+            overlay.classList.toggle('active');
+        }
+
+        // Toggle payment form function
+        function togglePaymentForm() {
+            const emptyState = document.getElementById('emptyState');
+            const paymentForm = document.getElementById('paymentForm');
+            const topNavTitle = document.querySelector('.top-nav h1');
+
+            if (currentView === 'offers') {
+                // Switch to payment form view
+                emptyState.classList.add('hidden');
+                paymentForm.classList.remove('hidden');
+                topNavTitle.textContent = 'Add Funds';
+                currentView = 'payment';
+            } else {
+                // Switch back to offers view
+                emptyState.classList.remove('hidden');
+                paymentForm.classList.add('hidden');
+                topNavTitle.textContent = 'Offers';
+                currentView = 'offers';
+            }
+        }
+
+        // Payment method selection function
+        function selectPaymentMethod(method) {
+            const buttons = document.querySelectorAll('.payment-method');
+            const stripeSect = document.querySelector('.stripe-section');
+            const paypalSect = document.querySelector('.paypal-section');
+            
+            // Update active button state
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Show/hide appropriate payment sections
+            if (method === 'stripe') {
+                stripeSect.classList.remove('hidden');
+                paypalSect.classList.add('hidden');
+            } else {
+                stripeSect.classList.add('hidden');
+                paypalSect.classList.remove('hidden');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial state
+            const emptyState = document.getElementById('emptyState');
+            const paymentForm = document.getElementById('paymentForm');
+            
+            emptyState.classList.remove('hidden');
+            paymentForm.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
