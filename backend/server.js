@@ -181,7 +181,7 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname, '/frontend/index.html'));
+    res.sendFile(('/frontend/index.html'));
   });
   
 
