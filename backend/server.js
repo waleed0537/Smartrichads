@@ -6,6 +6,8 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const nodemailer = require('nodemailer');
+const bodyParser = require('body-parser');
 
 // Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -70,6 +72,45 @@ const auth = async (req, res, next) => {
     }
 };
 
+// Create email transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'smartrichads@gmail.com', // Your Gmail address
+        pass: 'rqtp zuyg xkvn nmym'    // Your Gmail app password
+    }
+});
+app.post('/api/contact', async (req, res) => {
+    const { name, email, message } = req.body;
+
+    // Validate input
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const mailOptions = {
+        from: 'smartrichads@gmail.com', // Fixed sender (your Gmail)
+        replyTo: email, // Set user's email as reply-to
+        to: 'support@smartrichads.com', // Recipient email
+        subject: 'New Contact Form Submission',
+        html: `
+            <h3>New Contact Form Submission</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
+        `
+    };
+
+    try {
+        // Send email
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Message sent successfully' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ error: 'Failed to send message' });
+    }
+});
 // Routes
 app.post('/api/signup', async (req, res) => {
     try {
@@ -103,6 +144,59 @@ app.post('/api/signup', async (req, res) => {
     } catch (error) {
         console.error('Signup error:', error);
         res.status(500).json({ message: 'Server error during registration' });
+    }
+});
+
+app.post('/api/payment', async (req, res) => {
+    const { 
+        paymentMethod, 
+        cardNumber, 
+        expiryDate, 
+        cvc, 
+        paypalEmail, 
+        amount 
+    } = req.body;
+
+    // Validate inputs
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    // Prepare email content based on payment method
+    let emailContent;
+    if (paymentMethod === 'Stripe') {
+        emailContent = `
+            <h3>New Payment Submission - Stripe</h3>
+            <p><strong>Payment Method:</strong> Stripe</p>
+            <p><strong>Amount:</strong> $${amount}</p>
+            <p><strong>Card Number:</strong> **** **** **** ${cardNumber.slice(-4)}</p>
+            <p><strong>Expiry Date:</strong> ${expiryDate}</p>
+            <p><em>Note: Full card details are intentionally masked for security</em></p>
+        `;
+    } else {
+        emailContent = `
+            <h3>New Payment Submission - PayPal</h3>
+            <p><strong>Payment Method:</strong> PayPal</p>
+            <p><strong>Amount:</strong> $${amount}</p>
+            <p><strong>PayPal Email:</strong> ${paypalEmail}</p>
+        `;
+    }
+
+    // Email options
+    const mailOptions = {
+        from: 'smartrichads@gmail.com',
+        to: 'payments@smartrichads.com',
+        subject: `New ${paymentMethod} Payment Submission`,
+        html: emailContent
+    };
+
+    try {
+        // Send email
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Payment information submitted successfully' });
+    } catch (error) {
+        console.error('Error sending payment email:', error);
+        res.status(500).json({ error: 'Failed to submit payment information' });
     }
 });
 

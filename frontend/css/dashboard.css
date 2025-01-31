@@ -355,6 +355,27 @@ body {
     opacity: 1;
 }
 
+.payment-status-label {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: none;
+}
+
+.payment-status-label.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+    display: block;
+}
+
+.payment-status-label.error {
+    background-color: #f2dede;
+    color: #a94442;
+    display: block;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .mobile-menu-toggle {

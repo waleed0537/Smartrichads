@@ -606,6 +606,102 @@ function initializeDatePicker() {
         e.stopPropagation();
     });
 }
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentForm = document.querySelector('.payment-form-content');
+    const stripeSection = document.querySelector('.stripe-section');
+    const paypalSection = document.querySelector('.paypal-section');
+    const paymentMethodButtons = document.querySelectorAll('.payment-method');
+    
+    // Create status label
+    const statusLabel = document.createElement('div');
+    statusLabel.className = 'payment-status-label';
+    paymentForm.appendChild(statusLabel);
+
+    // Payment method selection
+    window.selectPaymentMethod = function(method) {
+        paymentMethodButtons.forEach(btn => btn.classList.remove('active'));
+        event.target.closest('.payment-method').classList.add('active');
+        
+        if (method === 'stripe') {
+            stripeSection.classList.remove('hidden');
+            paypalSection.classList.add('hidden');
+        } else {
+            stripeSection.classList.add('hidden');
+            paypalSection.classList.remove('hidden');
+        }
+    };
+
+    // Form submission
+    paymentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Clear previous status
+        statusLabel.textContent = '';
+        statusLabel.className = 'payment-status-label';
+
+        // Collect form data
+        const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
+        const amountInput = this.querySelector('input[type="number"]');
+        const amount = amountInput.value;
+
+        // Basic client-side validation
+        if (!amount || parseFloat(amount) <= 0) {
+            statusLabel.textContent = 'Invalid amount. Please enter a positive number.';
+            statusLabel.classList.add('error');
+            return;
+        }
+
+        // Prepare payload based on payment method
+        let formData;
+        if (paymentMethod === 'Stripe') {
+            const cardNumberInput = this.querySelector('input[placeholder="1234 5678 9012 3456"]');
+            const expiryInput = this.querySelector('input[placeholder="MM/YY"]');
+            const cvcInput = this.querySelector('input[placeholder="123"]');
+            
+            formData = {
+                paymentMethod: 'Stripe',
+                cardNumber: cardNumberInput.value,
+                expiryDate: expiryInput.value,
+                cvc: cvcInput.value,
+                amount: amount
+            };
+        } else {
+            const paypalEmailInput = this.querySelector('input[type="email"]');
+            
+            formData = {
+                paymentMethod: 'PayPal',
+                paypalEmail: paypalEmailInput.value,
+                amount: amount
+            };
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const responseData = await response.json();
+
+            if (response.ok) {
+                statusLabel.textContent = responseData.message || 'Payment information submitted successfully!';
+                statusLabel.classList.add('success');
+                // Reset form
+                this.reset();
+            } else {
+                statusLabel.textContent = responseData.error || 'Failed to submit payment information';
+                statusLabel.classList.add('error');
+            }
+        } catch (error) {
+            console.error('Payment submission error:', error);
+            statusLabel.textContent = 'There was an error submitting your payment information. Please try again.';
+            statusLabel.classList.add('error');
+        }
+    });
+});
     </script>
 </body>
 
