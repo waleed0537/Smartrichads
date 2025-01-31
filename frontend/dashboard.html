@@ -7,6 +7,7 @@
     <title>Dashboard - Richads</title>
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/finances.css">
+    <link rel="stylesheet" href="./css/campaigns.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .date-filter {
@@ -172,6 +173,12 @@
                         <a href="#finances">
                             <i class="fa-solid fa-coins"></i>
                             <span>Finances</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#campaigns" onclick="showSection('campaignsSection')">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>Campaigns</span>
                         </a>
                     </li>
                     <li>
@@ -347,6 +354,69 @@
                         </div>
                     </div>
                 </div>
+                <!-- Campaigns Section -->
+<div id="campaignsSection" class="campaigns-section hidden">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Impressions</th>
+                    <th>Winrate</th>
+                    <th>Clicks</th>
+                    <th>CTR</th>
+                    <th>Conv</th>
+                    <th>Spend</th>
+                    <th>Microbidding</th>
+                    <th>eCPC</th>
+                    <th>eCPA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Campaign_USA</td>
+                    <td><span class="status-badge">Active</span></td>
+                    <td>4,290,820</td>
+                    <td>47%</td>
+                    <td>3,838</td>
+                    <td>0.89%</td>
+                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                    <td>$35</td>
+                    <td class="bid-type">+ Custom Bid</td>
+                    <td>$0.009</td>
+                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                </tr>
+                <tr>
+                    <td>Campaign_IDN_NEW</td>
+                    <td><span class="status-badge">Active</span></td>
+                    <td>4,484,940</td>
+                    <td>51%</td>
+                    <td>3,945</td>
+                    <td>0.87%</td>
+                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                    <td>$32</td>
+                    <td class="bid-type">+ Custom Bid</td>
+                    <td>$0.008</td>
+                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                </tr>
+                <tr>
+                    <td>Campaign_IND_Start</td>
+                    <td><span class="status-badge">Active</span></td>
+                    <td>3,913,540</td>
+                    <td>36%</td>
+                    <td>3,670</td>
+                    <td>0.93%</td>
+                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                    <td>$30</td>
+                    <td class="bid-type">⟋ CPC * 2</td>
+                    <td>$0.008</td>
+                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                </tr>
+            </tbody>
+         </table>
+    </div>
+</div>
             </div>
 
         </main>
@@ -356,181 +426,186 @@
         // Initialize variables
         let currentView = 'offers';
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const body = document.body;
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const body = document.body;
+    sidebar.classList.toggle('active');
+    body.classList.toggle('menu-open');
 
-            sidebar.classList.toggle('active');
-            body.classList.toggle('menu-open');
+    let overlay = document.getElementById('mobileOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'mobileOverlay';
+        overlay.className = 'mobile-overlay';
+        overlay.onclick = toggleSidebar;
+        document.body.appendChild(overlay);
+    }
+    overlay.classList.toggle('active');
+}
 
-            let overlay = document.getElementById('mobileOverlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'mobileOverlay';
-                overlay.className = 'mobile-overlay';
-                overlay.onclick = toggleSidebar;
-                document.body.appendChild(overlay);
-            }
-            overlay.classList.toggle('active');
+function showSection(sectionId) {
+    // Hide all sections
+    const sections = ['emptyState', 'paymentForm', 'financesSection', 'campaignsSection'];
+    sections.forEach(section => {
+        const elem = document.getElementById(section);
+        if (elem) elem.classList.add('hidden');
+    });
+
+    // Show requested section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) targetSection.classList.remove('hidden');
+
+    // Update active nav item
+    document.querySelectorAll('.nav-menu li').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Handle Add Funds active state
+    if (sectionId === 'paymentForm') {
+        const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
+        addFundsNavItem.classList.add('active');
+    } else {
+        const navItem = document.querySelector(`[data-section="${sectionId}"]`);
+        if (navItem) {
+            navItem.classList.add('active');
         }
+    }
 
-        function showSection(sectionId) {
-            // Hide all sections
-            const sections = ['emptyState', 'paymentForm', 'financesSection'];
-            sections.forEach(section => {
-                document.getElementById(section).classList.add('hidden');
-            });
+    // Update header and current view
+    const topNavTitle = document.querySelector('.top-nav h1');
+    if (sectionId === 'paymentForm') {
+        topNavTitle.textContent = 'Add Funds';
+        currentView = 'payment';
+    } else if (sectionId === 'financesSection') {
+        topNavTitle.textContent = 'Finances';
+        currentView = 'finances';
+    } else if (sectionId === 'campaignsSection') {
+        topNavTitle.textContent = 'Campaigns';
+        currentView = 'campaigns';
+    } else {
+        topNavTitle.textContent = 'Offers';
+        currentView = 'offers';
+    }
+}
 
-            // Show requested section
-            document.getElementById(sectionId).classList.remove('hidden');
+function togglePaymentForm() {
+    showSection('paymentForm');
+    document.querySelectorAll('.nav-menu li').forEach(item => {
+        item.classList.remove('active');
+    });
+    const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
+    addFundsNavItem.classList.add('active');
+    
+    if (window.innerWidth <= 768) {
+        toggleSidebar();
+    }
+}
 
-            // Update active nav item
-            document.querySelectorAll('.nav-menu li').forEach(item => {
-                item.classList.remove('active');
-            });
+function selectPaymentMethod(method) {
+    const buttons = document.querySelectorAll('.payment-method');
+    const stripeSect = document.querySelector('.stripe-section');
+    const paypalSect = document.querySelector('.paypal-section');
 
-            // Handle Add Funds active state
-            if (sectionId === 'paymentForm') {
-                const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
-                addFundsNavItem.classList.add('active');
-            } else {
-                const navItem = document.querySelector(`[data-section="${sectionId}"]`);
-                if (navItem) {
-                    navItem.classList.add('active');
-                }
-            }
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
 
-            // Update header and current view
-            const topNavTitle = document.querySelector('.top-nav h1');
-            if (sectionId === 'paymentForm') {
-                topNavTitle.textContent = 'Add Funds';
-                currentView = 'payment';
-            } else if (sectionId === 'financesSection') {
-                topNavTitle.textContent = 'Finances';
-                currentView = 'finances';
-            } else {
-                topNavTitle.textContent = 'Offers';
-                currentView = 'offers';
-            }
-        }
+    if (method === 'stripe') {
+        stripeSect.classList.remove('hidden');
+        paypalSect.classList.add('hidden');
+    } else {
+        stripeSect.classList.add('hidden');
+        paypalSect.classList.remove('hidden');
+    }
+}
 
-        function togglePaymentForm() {
-            showSection('paymentForm');
+document.addEventListener('DOMContentLoaded', function() {
+    showSection('emptyState');
 
-            // Update active states
-            document.querySelectorAll('.nav-menu li').forEach(item => {
-                item.classList.remove('active');
-            });
+    const navItems = {
+        'offers': 'emptyState',
+        'finances': 'financesSection',
+        'campaigns': 'campaignsSection'
+    };
 
-            // Add active class to Add Funds nav item
-            const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
-            addFundsNavItem.classList.add('active');
+    for (const [key, value] of Object.entries(navItems)) {
+        const navLink = document.querySelector(`a[href="#${key}"]`);
+        if (navLink) {
+            const navItem = navLink.parentElement;
+            navItem.setAttribute('data-section', value);
 
-            // Close sidebar on mobile if needed
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
-        }
-
-        function selectPaymentMethod(method) {
-            const buttons = document.querySelectorAll('.payment-method');
-            const stripeSect = document.querySelector('.stripe-section');
-            const paypalSect = document.querySelector('.paypal-section');
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            if (method === 'stripe') {
-                stripeSect.classList.remove('hidden');
-                paypalSect.classList.add('hidden');
-            } else {
-                stripeSect.classList.add('hidden');
-                paypalSect.classList.remove('hidden');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize page state
-            showSection('emptyState');
-
-            // Set up navigation handlers
-            const navItems = {
-                'offers': 'emptyState',
-                'finances': 'financesSection'
-            };
-
-            for (const [key, value] of Object.entries(navItems)) {
-                const navItem = document.querySelector(`a[href="#${key}"]`).parentElement;
-                navItem.setAttribute('data-section', value);
-
-                navItem.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showSection(value);
-                    if (window.innerWidth <= 768) {
-                        toggleSidebar();
-                    }
-                });
-            }
-
-            // Initialize transaction tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                });
-            });
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            const dateFilterBtn = document.querySelector('.date-filter-btn');
-            const popup = document.querySelector('.date-picker-popup');
-            const cancelBtn = document.querySelector('.cancel-btn');
-            const applyBtn = document.querySelector('.apply-btn');
-            const startDate = document.getElementById('startDate');
-            const startTime = document.getElementById('startTime');
-            const endDate = document.getElementById('endDate');
-            const endTime = document.getElementById('endTime');
-
-            function formatDate(date, time) {
-                const d = new Date(`${date}T${time}`);
-                return d.toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: false
-                });
-            }
-
-            function updateDateRangeText() {
-                const formattedText = `${formatDate(startDate.value, startTime.value)} - ${formatDate(endDate.value, endTime.value)}`;
-                document.getElementById('dateRangeText').textContent = formattedText;
-            }
-
-            dateFilterBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                popup.classList.toggle('hidden');
-            });
-
-            cancelBtn.addEventListener('click', () => {
-                popup.classList.add('hidden');
-            });
-
-            applyBtn.addEventListener('click', () => {
-                updateDateRangeText();
-                popup.classList.add('hidden');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!popup.contains(e.target) && !dateFilterBtn.contains(e.target)) {
-                    popup.classList.add('hidden');
+            navItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(value);
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
                 }
             });
+        }
+    }
 
-            popup.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         });
+    });
+
+    initializeDatePicker();
+});
+
+function initializeDatePicker() {
+    const dateFilterBtn = document.querySelector('.date-filter-btn');
+    const popup = document.querySelector('.date-picker-popup');
+    const cancelBtn = document.querySelector('.cancel-btn');
+    const applyBtn = document.querySelector('.apply-btn');
+    const startDate = document.getElementById('startDate');
+    const startTime = document.getElementById('startTime');
+    const endDate = document.getElementById('endDate');
+    const endTime = document.getElementById('endTime');
+
+    if (!dateFilterBtn) return;
+
+    function formatDate(date, time) {
+        const d = new Date(`${date}T${time}`);
+        return d.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    function updateDateRangeText() {
+        const formattedText = `${formatDate(startDate.value, startTime.value)} - ${formatDate(endDate.value, endTime.value)}`;
+        document.getElementById('dateRangeText').textContent = formattedText;
+    }
+
+    dateFilterBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popup.classList.toggle('hidden');
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        popup.classList.add('hidden');
+    });
+
+    applyBtn.addEventListener('click', () => {
+        updateDateRangeText();
+        popup.classList.add('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!popup.contains(e.target) && !dateFilterBtn.contains(e.target)) {
+            popup.classList.add('hidden');
+        }
+    });
+
+    popup.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+}
     </script>
 </body>
 
