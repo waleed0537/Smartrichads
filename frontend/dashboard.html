@@ -1,12 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Richads</title>
     <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/finances.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .date-filter {
+            position: relative;
+            display: inline-block;
+        }
+
+        .date-filter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 0.375rem;
+            color: #374151;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .date-filter-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .date-picker-popup {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            left: 0;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1rem;
+            min-width: 320px;
+            z-index: 50;
+            border: 1px solid #e5e7eb;
+        }
+
+        .date-picker-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .date-picker-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .date-picker-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .date-picker-group input {
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .date-picker-group input:focus {
+            outline: none;
+            border-color: #6d28d9;
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+        }
+
+        .date-picker-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .cancel-btn {
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 0.375rem;
+            color: #374151;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .cancel-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .apply-btn {
+            padding: 0.5rem 1rem;
+            background: #6d28d9;
+            border: none;
+            border-radius: 0.375rem;
+            color: white;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .apply-btn:hover {
+            background: #5b21b6;
+        }
+
+        @media (max-width: 768px) {
+            .date-picker-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                max-width: 320px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Mobile Menu Toggle Button -->
@@ -22,7 +147,7 @@
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
-            
+
             <nav class="nav-menu">
                 <ul>
                     <li class="active">
@@ -38,11 +163,11 @@
                         </a>
                     </li>
                     <li>
-    <a href="#add-funds" onclick="togglePaymentForm()">
-        <i class="fa-solid fa-wallet"></i>
-        <span>Add Funds</span>
-    </a>
-</li>
+                        <a href="#add-funds" onclick="togglePaymentForm()">
+                            <i class="fa-solid fa-wallet"></i>
+                            <span>Add Funds</span>
+                        </a>
+                    </li>
 
                     <li>
                         <a href="#finances">
@@ -56,14 +181,8 @@
                             <span>Settings</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#profile">
-                            <i class="fa-solid fa-user"></i>
-                            <span>Profile</span>
-                        </a>
-                    </li>
                 </ul>
-                
+
                 <div class="logout-section">
                     <a href="#logout" class="logout-link">
                         <i class="fa-solid fa-sign-out-alt"></i>
@@ -88,7 +207,7 @@
                     <button class="icon-button"><i class="fa-solid fa-search"></i></button>
                 </div>
             </header>
-            
+
             <div class="content-area">
                 <!-- No Offers State -->
                 <div class="empty-state" id="emptyState">
@@ -148,23 +267,103 @@
                         <button type="submit" class="submit-button">Proceed to Payment</button>
                     </form>
                 </div>
+                <!-- Add to dashboard.html inside main-content div -->
+                <div class="finances-section hidden" id="financesSection">
+                    <div class="finances-content">
+                        <div class="finance-cards">
+                            <div class="finance-card">
+                                <div class="card-header">Balance</div>
+                                <div class="card-amount">$ 0</div>
+                            </div>
+                            <div class="finance-card">
+                                <div class="card-header">Unpaid Approved Spend</div>
+                                <div class="card-amount">$ 0</div>
+                            </div>
+                            <div class="finance-card">
+                                <div class="card-header">Hold Spend</div>
+                                <div class="card-amount">$ 0</div>
+                            </div>
+                            <div class="finance-card summary-card">
+                                <div class="summary-item">
+                                    <span>Total Payments</span>
+                                    <span>-</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Total Expenses</span>
+                                    <span>-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="transactions-section">
+                            <div class="transaction-tabs">
+                                <button class="tab-btn active" data-tab="all">
+                                    <i class="fa-solid fa-list"></i>
+                                    All transactions
+                                </button>
+                                <button class="tab-btn" data-tab="payments">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                    Payments
+                                </button>
+                                <button class="tab-btn" data-tab="expenses">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                    Expenses
+                                </button>
+                                <button class="tab-btn" data-tab="balance">
+                                    <i class="fa-solid fa-wallet"></i>
+                                    Balance
+                                </button>
+                            </div>
+
+                            <div class="date-filter">
+                                <button class="date-filter-btn">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    <span id="dateRangeText">Jan 31, 2025 0:00 - Jan 31, 2025 18:07</span>
+                                </button>
+                                <div class="date-picker-popup hidden">
+                                    <div class="date-picker-content">
+                                        <div class="date-picker-group">
+                                            <label>Start Date & Time</label>
+                                            <input type="date" id="startDate" value="2025-01-31">
+                                            <input type="time" id="startTime" value="00:00">
+                                        </div>
+                                        <div class="date-picker-group">
+                                            <label>End Date & Time</label>
+                                            <input type="date" id="endDate" value="2025-01-31">
+                                            <input type="time" id="endTime" value="18:07">
+                                        </div>
+                                        <div class="date-picker-actions">
+                                            <button class="cancel-btn">Cancel</button>
+                                            <button class="apply-btn">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="no-transactions">
+                                <i class="fa-regular fa-file"></i>
+                                <h3>No transactions found</h3>
+                                <p>You have no data for the selected period</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </main>
     </div>
 
     <script>
         // Initialize variables
-        let currentView = 'offers';  // Track current view state
-        
-        // Toggle sidebar function
+        let currentView = 'offers';
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const body = document.body;
-            
+
             sidebar.classList.toggle('active');
             body.classList.toggle('menu-open');
-            
-            // Create overlay if it doesn't exist
+
             let overlay = document.getElementById('mobileOverlay');
             if (!overlay) {
                 overlay = document.createElement('div');
@@ -176,38 +375,52 @@
             overlay.classList.toggle('active');
         }
 
-        // Toggle payment form function
-        function togglePaymentForm() {
-            const emptyState = document.getElementById('emptyState');
-            const paymentForm = document.getElementById('paymentForm');
-            const topNavTitle = document.querySelector('.top-nav h1');
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = ['emptyState', 'paymentForm', 'financesSection'];
+            sections.forEach(section => {
+                document.getElementById(section).classList.add('hidden');
+            });
 
-            if (currentView === 'offers') {
-                // Switch to payment form view
-                emptyState.classList.add('hidden');
-                paymentForm.classList.remove('hidden');
+            // Show requested section
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            // Update active nav item and current view
+            document.querySelectorAll('.nav-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            const navItem = document.querySelector(`[data-section="${sectionId}"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+
+            // Update current view and header
+            const topNavTitle = document.querySelector('.top-nav h1');
+            if (sectionId === 'paymentForm') {
                 topNavTitle.textContent = 'Add Funds';
                 currentView = 'payment';
+            } else if (sectionId === 'financesSection') {
+                topNavTitle.textContent = 'Finances';
+                currentView = 'finances';
             } else {
-                // Switch back to offers view
-                emptyState.classList.remove('hidden');
-                paymentForm.classList.add('hidden');
                 topNavTitle.textContent = 'Offers';
                 currentView = 'offers';
             }
         }
 
-        // Payment method selection function
+        function togglePaymentForm() {
+            showSection('paymentForm');
+        }
+
         function selectPaymentMethod(method) {
             const buttons = document.querySelectorAll('.payment-method');
             const stripeSect = document.querySelector('.stripe-section');
             const paypalSect = document.querySelector('.paypal-section');
-            
-            // Update active button state
+
             buttons.forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
-            // Show/hide appropriate payment sections
+
             if (method === 'stripe') {
                 stripeSect.classList.remove('hidden');
                 paypalSect.classList.add('hidden');
@@ -217,15 +430,89 @@
             }
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set initial state
-            const emptyState = document.getElementById('emptyState');
-            const paymentForm = document.getElementById('paymentForm');
-            
-            emptyState.classList.remove('hidden');
-            paymentForm.classList.add('hidden');
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize page state
+            showSection('emptyState');
+
+            // Set up navigation handlers
+            const navItems = {
+                'offers': 'emptyState',
+                'finances': 'financesSection'
+            };
+
+            for (const [key, value] of Object.entries(navItems)) {
+                const navItem = document.querySelector(`a[href="#${key}"]`).parentElement;
+                navItem.setAttribute('data-section', value);
+
+                navItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showSection(value);
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            }
+
+            // Initialize transaction tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateFilterBtn = document.querySelector('.date-filter-btn');
+            const popup = document.querySelector('.date-picker-popup');
+            const cancelBtn = document.querySelector('.cancel-btn');
+            const applyBtn = document.querySelector('.apply-btn');
+            const startDate = document.getElementById('startDate');
+            const startTime = document.getElementById('startTime');
+            const endDate = document.getElementById('endDate');
+            const endTime = document.getElementById('endTime');
+
+            function formatDate(date, time) {
+                const d = new Date(`${date}T${time}`);
+                return d.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: false
+                });
+            }
+
+            function updateDateRangeText() {
+                const formattedText = `${formatDate(startDate.value, startTime.value)} - ${formatDate(endDate.value, endTime.value)}`;
+                document.getElementById('dateRangeText').textContent = formattedText;
+            }
+
+            dateFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popup.classList.toggle('hidden');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                popup.classList.add('hidden');
+            });
+
+            applyBtn.addEventListener('click', () => {
+                updateDateRangeText();
+                popup.classList.add('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!popup.contains(e.target) && !dateFilterBtn.contains(e.target)) {
+                    popup.classList.add('hidden');
+                }
+            });
+
+            popup.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
         });
     </script>
 </body>
+
 </html>
