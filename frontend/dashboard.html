@@ -141,8 +141,7 @@
 
         <!-- Left Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
-            <div class="logo">
-                <img src="logo.png" alt="Logo">
+            <div>
                 <button class="close-menu" onclick="toggleSidebar()">
                     <i class="fa-solid fa-times"></i>
                 </button>
@@ -385,17 +384,23 @@
             // Show requested section
             document.getElementById(sectionId).classList.remove('hidden');
 
-            // Update active nav item and current view
+            // Update active nav item
             document.querySelectorAll('.nav-menu li').forEach(item => {
                 item.classList.remove('active');
             });
 
-            const navItem = document.querySelector(`[data-section="${sectionId}"]`);
-            if (navItem) {
-                navItem.classList.add('active');
+            // Handle Add Funds active state
+            if (sectionId === 'paymentForm') {
+                const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
+                addFundsNavItem.classList.add('active');
+            } else {
+                const navItem = document.querySelector(`[data-section="${sectionId}"]`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
             }
 
-            // Update current view and header
+            // Update header and current view
             const topNavTitle = document.querySelector('.top-nav h1');
             if (sectionId === 'paymentForm') {
                 topNavTitle.textContent = 'Add Funds';
@@ -411,6 +416,20 @@
 
         function togglePaymentForm() {
             showSection('paymentForm');
+
+            // Update active states
+            document.querySelectorAll('.nav-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add active class to Add Funds nav item
+            const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
+            addFundsNavItem.classList.add('active');
+
+            // Close sidebar on mobile if needed
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
         }
 
         function selectPaymentMethod(method) {
