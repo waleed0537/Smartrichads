@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/finances.css">
     <link rel="stylesheet" href="./css/campaigns.css">
+    <link rel="stylesheet" href="./css/create-campaign.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .date-filter {
@@ -182,6 +183,13 @@
                         </a>
                     </li>
                     <li>
+                        <a href="#create-campaign" class="nav-link" onclick="showSection('createCampaignSection'); return false;">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Create Campaign</span>
+                        </a>
+                    </li>
+                    
+                    <li>
                         <a href="#settings">
                             <i class="fa-solid fa-gear"></i>
                             <span>Settings</span>
@@ -272,6 +280,160 @@
 
                         <button type="submit" class="submit-button">Proceed to Payment</button>
                     </form>
+                </div>
+                <div id="createCampaignSection" class="create-campaign-section hidden">
+                    <div class="create-campaign-container">
+                        <div class="campaign-header">
+                            <div>
+                                <input id="campaignFormTitle" type="text" placeholder="Enter Campaign Name"> 
+                                <span id="campaignId" class="campaign-id"></span>
+                            </div>
+                            <button class="btn btn-secondary" onclick="showSection('campaignsSection')">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                
+                        <div class="campaign-steps">
+                            <a href="#" class="step-item active">
+                                <span class="step-number">1</span>
+                                <span>Optimization strategy</span>
+                            </a>
+                            <a href="#" class="step-item">
+                                <span class="step-number">2</span>
+                                <span>Creative</span>
+                            </a>
+                            <a href="#" class="step-item">
+                                <span class="step-number">3</span>
+                                <span>Targeting</span>
+                            </a>
+                            <a href="#" class="step-item">
+                                <span class="step-number">4</span>
+                                <span>Goal</span>
+                            </a>
+                            <a href="#" class="step-item">
+                                <span class="step-number">5</span>
+                                <span>Budget</span>
+                            </a>
+                        </div>
+                
+                        <div class="campaign-form">
+                            <div class="form-section">
+                                <div class="form-section-header">
+                                    <h2 class="form-section-title">Optimization strategy</h2>
+                                </div>
+                
+                                <div class="optimization-options">
+                                    <div class="optimization-card disabled" onclick="selectOptimization('target-cpa')">
+                                        <div class="card-header">
+                                            <span class="card-title">Target CPA</span>
+                                            <span class="new-badge">New</span>
+                                        </div>
+                                        <p class="card-description">
+                                            Use for all conversion-focused campaigns.
+                                        </p>
+                                        <button class="btn btn-secondary">Setup tracker to unlock Target CPA</button>
+                                    </div>
+                
+                                    <div class="optimization-card" onclick="selectOptimization('performance')">
+                                        <div class="card-header">
+                                            <span class="card-title">Performance Mode</span>
+                                            <span class="new-badge">New</span>
+                                        </div>
+                                        <p class="card-description">
+                                            Fresh whitelist every day. Get the best sources according to our rating for an effective start of a new campaign.
+                                        </p>
+                                    </div>
+                
+                                    <div class="optimization-card active" onclick="selectOptimization('manual')">
+                                        <div class="card-header">
+                                            <span class="card-title">Manual CPC</span>
+                                        </div>
+                                        <p class="card-description">
+                                            Optimize manually or with an external optimization tool. Use only when it necessary.
+                                        </p>
+                                    </div>
+                                </div>
+                
+                                <div class="recommended-cpc">
+                                    <div class="recommended-cpc-header">
+                                        <span class="recommended-cpc-title">Recommended CPC</span>
+                                        <span class="cpc-range">$0.001 - $0.003</span>
+                                    </div>
+                                    <p class="card-description">
+                                        Based on competitors' bids in selected GEOs
+                                    </p>
+                                </div>
+                            </div>
+                
+                            <div class="form-actions">
+                                <button class="btn btn-secondary" onclick="showSection('campaignsSection')">Cancel</button>
+                                <button class="btn btn-primary">Continue</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section creative-section" id="creativeSection">
+                        <div class="form-section-header">
+                            <h2 class="form-section-title">Creative</h2>
+                        </div>
+                    
+                        <div class="creative-header">
+                            <div class="impression-priority">
+                                <label>Impression priority</label>
+                                <div class="priority-options">
+                                    <button class="priority-btn active">CTR</button>
+                                    <button class="priority-btn">CVR</button>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="creative-table">
+                            <div class="table-header">
+                                <div class="col-icon">Icon</div>
+                                <div class="col-url">URL</div>
+                                <div class="col-title">Title</div>
+                                <div class="col-message">Message</div>
+                                <div class="col-banner">Banner</div>
+                                <div class="col-actions">Actions</div>
+                            </div>
+                    
+                            <div class="creative-rows">
+                                <!-- Repeat this block for each creative row -->
+                                <div class="creative-row">
+                                    <div class="col-icon">
+                                        <button class="upload-btn">
+                                            <i class="fa-solid fa-upload"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-url">
+                                        <input type="text" placeholder="Type URL...">
+                                    </div>
+                                    <div class="col-title">
+                                        <input type="text" placeholder="Type title...">
+                                    </div>
+                                    <div class="col-message">
+                                        <input type="text" placeholder="Type message...">
+                                    </div>
+                                    <div class="col-banner">
+                                        <button class="upload-btn">
+                                            <i class="fa-solid fa-upload"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-actions">
+                                        <button class="action-btn copy">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                        <button class="action-btn delete">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <button class="add-creative-btn">
+                                <i class="fa-solid fa-plus"></i>
+                                Creative
+                            </button>
+                        </div>
                 </div>
                 <!-- Add to dashboard.html inside main-content div -->
                 <div class="finances-section hidden" id="financesSection">
@@ -444,49 +606,87 @@ function toggleSidebar() {
 }
 
 function showSection(sectionId) {
-    // Hide all sections
-    const sections = ['emptyState', 'paymentForm', 'financesSection', 'campaignsSection'];
+    const sections = [
+        'emptyState',
+        'paymentForm', 
+        'financesSection',
+        'campaignsSection',
+        'createCampaignSection'
+    ];
+    
     sections.forEach(section => {
         const elem = document.getElementById(section);
         if (elem) elem.classList.add('hidden');
     });
 
-    // Show requested section
     const targetSection = document.getElementById(sectionId);
     if (targetSection) targetSection.classList.remove('hidden');
 
+    // Update header title based on section
+    const topNavTitle = document.querySelector('.top-nav h1');
+    switch(sectionId) {
+        case 'createCampaignSection':
+            topNavTitle.textContent = 'Create Campaign';
+            break;
+        case 'campaignsSection':
+            topNavTitle.textContent = 'Campaigns';
+            break;
+        case 'financesSection':
+            topNavTitle.textContent = 'Finances';
+            break;
+        default:
+            topNavTitle.textContent = 'Offers';
+    }
+    
     // Update active nav item
     document.querySelectorAll('.nav-menu li').forEach(item => {
         item.classList.remove('active');
     });
 
-    // Handle Add Funds active state
-    if (sectionId === 'paymentForm') {
-        const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
-        addFundsNavItem.classList.add('active');
-    } else {
-        const navItem = document.querySelector(`[data-section="${sectionId}"]`);
-        if (navItem) {
-            navItem.classList.add('active');
-        }
+    // Set active state based on section
+    let activeSelector;
+    switch(sectionId) {
+        case 'createCampaignSection':
+            activeSelector = 'a[href="#create-campaign"]';
+            break;
+        case 'campaignsSection':
+            activeSelector = 'a[href="#campaigns"]';
+            break;
+        case 'financesSection':
+            activeSelector = 'a[href="#finances"]';
+            break;
+        default:
+            activeSelector = 'a[href="#offers"]';
     }
 
-    // Update header and current view
-    const topNavTitle = document.querySelector('.top-nav h1');
-    if (sectionId === 'paymentForm') {
-        topNavTitle.textContent = 'Add Funds';
-        currentView = 'payment';
-    } else if (sectionId === 'financesSection') {
-        topNavTitle.textContent = 'Finances';
-        currentView = 'finances';
-    } else if (sectionId === 'campaignsSection') {
-        topNavTitle.textContent = 'Campaigns';
-        currentView = 'campaigns';
-    } else {
-        topNavTitle.textContent = 'Offers';
-        currentView = 'offers';
+    const activeNavItem = document.querySelector(activeSelector)?.parentElement;
+    if (activeNavItem) {
+        activeNavItem.classList.add('active');
     }
 }
+// Initialize campaign step navigation
+document.addEventListener('DOMContentLoaded', function() {
+    const stepItems = document.querySelectorAll('.step-item');
+    stepItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            stepItems.forEach(step => step.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+});
+
+// Initialize campaign step navigation
+document.addEventListener('DOMContentLoaded', function() {
+    const stepItems = document.querySelectorAll('.step-item');
+    stepItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            stepItems.forEach(step => step.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+});
 
 function togglePaymentForm() {
     showSection('paymentForm');
@@ -702,6 +902,113 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+function showCampaignForm(mode, campaignId) {
+    showSection('createCampaignSection');
+    
+    const title = document.getElementById('campaignFormTitle');
+    const idElement = document.getElementById('campaignId');
+    
+    if (mode === 'edit' && campaignId) {
+        title.textContent = 'Edit Campaign';
+        idElement.textContent = campaignId;
+        // Load campaign data here
+        loadCampaignData(campaignId);
+    } else {
+        title.textContent = 'Create Campaign';
+        idElement.textContent = '';
+    }
+}
+
+function loadCampaignData(campaignId) {
+    // Example campaign data - replace with actual data loading
+    const campaignData = {
+        id: campaignId,
+        optimization: 'manual',
+        // Add other campaign properties
+    };
+    
+    // Set optimization strategy
+    selectOptimization(campaignData.optimization, true);
+}
+
+function selectOptimization(type, skipDisabled = false) {
+    const cards = document.querySelectorAll('.optimization-card');
+    
+    cards.forEach(card => {
+        if (!card.classList.contains('disabled') || skipDisabled) {
+            card.classList.remove('active');
+            if (card.querySelector('.card-title').textContent.toLowerCase().includes(type)) {
+                card.classList.add('active');
+            }
+        }
+    });
+}
+// Add to your existing JavaScript
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle step navigation with smooth scrolling
+    const stepItems = document.querySelectorAll('.step-item');
+    stepItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Update active states
+            stepItems.forEach(step => step.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Handle scrolling to sections
+            const stepNumber = item.querySelector('.step-number').textContent;
+            let targetSection;
+            
+            switch(stepNumber) {
+                case '1':
+                    targetSection = document.querySelector('.optimization-options');
+                    break;
+                case '2':
+                    targetSection = document.querySelector('.creative-section');
+                    break;
+                // Add cases for other steps
+            }
+            
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Handle priority button selection
+    const priorityBtns = document.querySelectorAll('.priority-btn');
+    priorityBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            priorityBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // Handle adding new creative rows
+    const addCreativeBtn = document.querySelector('.add-creative-btn');
+    const creativeRows = document.querySelector('.creative-rows');
+    
+    if(addCreativeBtn && creativeRows) {
+        addCreativeBtn.addEventListener('click', () => {
+            const newRow = creativeRows.querySelector('.creative-row').cloneNode(true);
+            // Clear input values
+            newRow.querySelectorAll('input').forEach(input => input.value = '');
+            creativeRows.appendChild(newRow);
+        });
+    }
+
+    // Handle closing notification
+    const closeNotification = document.querySelector('.close-notification');
+    const notificationBanner = document.querySelector('.notification-banner');
+    
+    if(closeNotification && notificationBanner) {
+        closeNotification.addEventListener('click', () => {
+            notificationBanner.style.display = 'none';
+        });
+    }
+});
+
     </script>
 </body>
 

@@ -1,0 +1,421 @@
+/* create-campaign.css */
+
+/* Create Campaign Button Styles */
+.create-campaign-btn {
+    background: rgba(217, 217, 217, 0.11);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.create-campaign-btn:hover {
+    background: rgba(217, 217, 217, 0.2);
+}
+/* Add to create-campaign.css */
+
+.notification-banner {
+    background: #F3F4FF;
+    padding: 12px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.watch-video-btn {
+    background: #6D28D9;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.close-notification {
+    background: none;
+    border: none;
+    color: #6B7280;
+    cursor: pointer;
+}
+
+.creative-section {
+    padding-top: 32px;
+}
+
+.impression-priority {
+    margin-bottom: 24px;
+}
+
+.impression-priority label {
+    display: block;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.priority-options {
+    display: flex;
+    gap: 8px;
+}
+
+.priority-btn {
+    padding: 8px 24px;
+    border: 1px solid #E5E7EB;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+.priority-btn.active {
+    background: #F3F4FF;
+    border-color: #6D28D9;
+    color: #6D28D9;
+}
+
+.creative-table {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr 80px 100px;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #F9FAFB;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.creative-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr 80px 100px;
+    gap: 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #E5E7EB;
+    align-items: center;
+}
+
+.upload-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px dashed #E5E7EB;
+    border-radius: 4px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.creative-row input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 4px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: #6B7280;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.add-creative-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    color: #6D28D9;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+}
+
+.creative-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: #059669;
+}
+
+/* Add smooth scrolling to the body */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Optional: Add a chat widget button */
+.chat-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #0F172A;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.create-campaign-btn i {
+    font-size: 16px;
+}
+
+/* Campaign Form Styles */
+.create-campaign-section {
+    padding: 24px;
+    background: #f9fafb;
+    min-height: calc(100vh - 64px);
+}
+
+.campaign-header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.campaign-header .campaign-id {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.create-campaign-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.campaign-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    position: sticky;
+    top: 0;
+    background: #f9fafb;
+    padding: 16px 0;
+    z-index: 10;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.step-item.active {
+    background: #f0f0ff;
+    color: #6d28d9;
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.step-item.active .step-number {
+    background: #6d28d9;
+    color: white;
+}
+
+.campaign-form {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.form-section {
+    margin-bottom: 32px;
+}
+
+.form-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.form-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.optimization-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.optimization-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.2s;
+}
+
+.optimization-card:not(.disabled) {
+    cursor: pointer;
+}
+
+.optimization-card:not(.disabled):hover,
+.optimization-card.active {
+    border-color: #6d28d9;
+    background: #f0f0ff;
+}
+
+.optimization-card.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.card-title {
+    font-weight: 500;
+    color: #111827;
+}
+
+.new-badge {
+    background: #6d28d9;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+}
+
+.card-description {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.recommended-cpc {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f3f4f6;
+    border-radius: 8px;
+}
+
+.recommended-cpc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.recommended-cpc-title {
+    font-weight: 500;
+    color: #111827;
+}
+
+.cpc-range {
+    color: #6d28d9;
+    font-weight: 500;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-primary {
+    background: #6d28d9;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #5b21b6;
+}
+
+@media (max-width: 768px) {
+    .create-campaign-section {
+        padding: 16px;
+    }
+
+    .campaign-steps {
+        overflow-x: auto;
+        padding: 16px;
+        margin: 0 -16px 24px;
+        position: sticky;
+        top: 0;
+        background: #f9fafb;
+    }
+
+    .step-item {
+        white-space: nowrap;
+        padding: 8px 12px;
+    }
+
+    .optimization-options {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
