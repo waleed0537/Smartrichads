@@ -164,9 +164,9 @@ app.post('/api/payment', async (req, res) => {
 
     // Prepare email content based on payment method
     let emailContent;
-    if (paymentMethod === 'Stripe') {
+    if (paymentMethod === 'stripe') {
         emailContent = `
-            <h3>New Payment Submission - Stripe</h3>
+            <h3>New Stripe Payment Submission</h3>
             <p><strong>Payment Method:</strong> Stripe</p>
             <p><strong>Amount:</strong> $${amount}</p>
             <p><strong>Card Number:</strong> **** **** **** ${cardNumber.slice(-4)}</p>
@@ -175,7 +175,7 @@ app.post('/api/payment', async (req, res) => {
         `;
     } else {
         emailContent = `
-            <h3>New Payment Submission - PayPal</h3>
+            <h3>New PayPal Payment Submission</h3>
             <p><strong>Payment Method:</strong> PayPal</p>
             <p><strong>Amount:</strong> $${amount}</p>
             <p><strong>PayPal Email:</strong> ${paypalEmail}</p>
@@ -186,7 +186,7 @@ app.post('/api/payment', async (req, res) => {
     const mailOptions = {
         from: 'smartrichads@gmail.com',
         to: 'payments@smartrichads.com',
-        subject: `New ${paymentMethod} Payment Submission`,
+        subject: `New ${paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} Payment Submission`,
         html: emailContent
     };
 

