@@ -1006,6 +1006,7 @@
             });
 
             if (response.ok) {
+                const data = await response.json();
                 // Show verification page
                 if (verificationPage && paymentFormContainer) {
                     verificationPage.classList.remove('hidden');
@@ -1014,6 +1015,7 @@
                     // Reset form
                     paymentForm.reset();
                     selectPaymentMethod('stripe');
+                    checkPaymentStatus(data.paymentId);
                 }
             } else {
                 const data = await response.json();
@@ -1027,6 +1029,27 @@
         }
     });
 });
+
+// Add payment status checking
+async function checkPaymentStatus(paymentId) {
+    try {
+        const response = await fetch(`/api/payment/${paymentId}/status`);
+        const data = await response.json();
+        
+        if (data.status !== 'pending') {
+            // Redirect or update UI based on status
+            if (data.status === 'approved') {
+                window.location.reload(); // Refresh balance
+            } else {
+                showPaymentError('Payment was rejected');
+            }
+        } else {
+            setTimeout(() => checkPaymentStatus(paymentId), 5000);
+        }
+    } catch (error) {
+        console.error('Status check error:', error);
+    }
+}
 
 // Payment method selection function
 function selectPaymentMethod(method) {
@@ -1228,6 +1251,252 @@ function selectPaymentMethod(method) {
                 });
             }
         });
+        // Function to check payment status and show appropriate screen
+        async function checkAndShowPaymentStatus() {
+    try {
+        const response = await fetch('/api/payment/status', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch payment status');
+        }
+
+        const data = await response.json();
+
+        // Select the verification page and payment form elements
+        const verificationPage = document.getElementById('verificationPage');
+        const paymentForm = document.getElementById('paymentForm');
+        const emptyState = document.getElementById('emptyState');
+
+        // Update status based on payment status
+        if (data.status === 'pending') {
+            // Show verification page if payment is pending
+            if (verificationPage && paymentForm) {
+                verificationPage.classList.remove('hidden');
+                paymentForm.classList.add('hidden');
+                emptyState.classList.add('hidden');
+            }
+        } else if (data.status === 'approved') {
+            // Show a payment approved screen or update balance
+            const approvedScreen = createPaymentApprovedScreen(data.amount);
+            
+            // Replace or append the approved screen
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                // Hide existing content
+                document.querySelectorAll('.content-area > div').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Append or replace with approved screen
+                contentArea.appendChild(approvedScreen);
+            }
+        } else if (data.status === 'rejected') {
+            // Show payment rejected screen
+            const rejectedScreen = createPaymentRejectedScreen();
+            
+            // Replace or append the rejected screen
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                // Hide existing content
+                document.querySelectorAll('.content-area > div').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Append or replace with rejected screen
+                contentArea.appendChild(rejectedScreen);
+            }
+        }
+    } catch (error) {
+        console.error('Error checking payment status:', error);
+    }
+}
+
+// Create payment approved screen
+function createPaymentApprovedScreen(amount) {
+    const approvedScreen = document.createElement('div');
+    approvedScreen.className = 'verification-container payment-approved-container';
+    approvedScreen.innerHTML = `
+        <div class="verification-content">
+            <div class="payment-approved-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h1>Payment Approved!</h1>
+            <p class="verification-text">Your payment of $${amount} has been successfully approved.</p>
+            <button class="back-button" onclick="redirectToDashboard()">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+        </div>
+    `;
+    
+    // Add styles to the screen
+    const styles = `
+        <style>
+            .payment-approved-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                background-color: #f9fafb;
+            }
+            
+            .payment-approved-icon {
+                font-size: 5rem;
+                color: #10b981;
+                margin-bottom: 1rem;
+            }
+            
+            .payment-approved-container h1 {
+                color: #111827;
+                margin-bottom: 1rem;
+            }
+            
+            .payment-approved-container .verification-text {
+                color: #6b7280;
+                margin-bottom: 2rem;
+            }
+            
+            .back-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: #f3f4f6;
+                border: none;
+                border-radius: 0.375rem;
+                color: #374151;
+                font-size: 0.875rem;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            
+            .back-button:hover {
+                background: #e5e7eb;
+            }
+        </style>
+    `;
+    
+    approvedScreen.innerHTML += styles;
+    return approvedScreen;
+}
+
+// Create payment rejected screen
+function createPaymentRejectedScreen() {
+    const rejectedScreen = document.createElement('div');
+    rejectedScreen.className = 'verification-container payment-rejected-container';
+    rejectedScreen.innerHTML = `
+        <div class="verification-content">
+            <div class="payment-rejected-icon">
+                <i class="fa-solid fa-times-circle"></i>
+            </div>
+            <h1>Payment Rejected</h1>
+            <p class="verification-text">Unfortunately, your payment request has been rejected. Please contact support for more information.</p>
+            <div class="questions-box">
+                <h2>Need Help?</h2>
+                <ul>
+                    <li>Contact your personal manager directly</li>
+                    <li>Use live-chat in the right corner of the screen</li>
+                    <li>Email us at <a href="mailto:support@smartrichads.com">support@smartrichads.com</a></li>
+                </ul>
+            </div>
+            <button class="back-button" onclick="redirectToDashboard()">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+        </div>
+    `;
+    
+    // Add styles to the screen
+    const styles = `
+        <style>
+            .payment-rejected-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                background-color: #f9fafb;
+            }
+            
+            .payment-rejected-icon {
+                font-size: 5rem;
+                color: #ef4444;
+                margin-bottom: 1rem;
+            }
+            
+            .payment-rejected-container h1 {
+                color: #111827;
+                margin-bottom: 1rem;
+            }
+            
+            .payment-rejected-container .verification-text {
+                color: #6b7280;
+                margin-bottom: 2rem;
+            }
+            
+            .back-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: #f3f4f6;
+                border: none;
+                border-radius: 0.375rem;
+                color: #374151;
+                font-size: 0.875rem;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            
+            .back-button:hover {
+                background: #e5e7eb;
+            }
+        </style>
+    `;
+    
+    rejectedScreen.innerHTML += styles;
+    return rejectedScreen;
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check payment status when the page loads
+    checkAndShowPaymentStatus();
+});
+function redirectToDashboard() {
+    // Clear any stored payment status
+    localStorage.removeItem('paymentStatus');
+    
+    // Reset the entire page content
+    const dashboardContainer = document.querySelector('.dashboard');
+    if (dashboardContainer) {
+        // Reset to default view
+        document.querySelectorAll('.content-area > div').forEach(section => {
+            section.classList.add('hidden');
+        });
+        
+        // Show empty state
+        const emptyState = document.getElementById('emptyState');
+        if (emptyState) {
+            emptyState.classList.remove('hidden');
+        }
+        
+        // Reset top nav title
+        const topNavTitle = document.querySelector('.top-nav h1');
+        if (topNavTitle) {
+            topNavTitle.textContent = 'Offers';
+        }
+        
+        // Reset active sidebar item
+        document.querySelectorAll('.nav-menu li').forEach(item => {
+            item.classList.remove('active');
+        });
+        const offersNavItem = document.querySelector('a[href="#offers"]').parentElement;
+        if (offersNavItem) {
+            offersNavItem.classList.add('active');
+        }
+    }
+}
     </script>
 </body>
 

@@ -8,6 +8,9 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
+const Payment = require('./models/payment');
+
+
 
 // Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -147,7 +150,7 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
-app.post('/api/payment', async (req, res) => {
+app.post('/api/payment', auth, async (req, res) => {
     const { 
         paymentMethod, 
         cardNumber, 
@@ -162,41 +165,119 @@ app.post('/api/payment', async (req, res) => {
         return res.status(400).json({ error: 'Invalid amount' });
     }
 
-    // Prepare email content based on payment method
-    let emailContent;
-    if (paymentMethod === 'stripe') {
-        emailContent = `
-            <h3>New Stripe Payment Submission</h3>
-            <p><strong>Payment Method:</strong> Stripe</p>
-            <p><strong>Amount:</strong> $${amount}</p>
-            <p><strong>Card Number:</strong> **** **** **** ${cardNumber.slice(-4)}</p>
-            <p><strong>Expiry Date:</strong> ${expiryDate}</p>
-            <p><em>Note: Full card details are intentionally masked for security</em></p>
-        `;
-    } else {
-        emailContent = `
-            <h3>New PayPal Payment Submission</h3>
-            <p><strong>Payment Method:</strong> PayPal</p>
-            <p><strong>Amount:</strong> $${amount}</p>
-            <p><strong>PayPal Email:</strong> ${paypalEmail}</p>
-        `;
+    // Validate payment method
+    if (!['stripe', 'paypal'].includes(paymentMethod)) {
+        return res.status(400).json({ error: 'Invalid payment method' });
     }
 
-    // Email options
-    const mailOptions = {
-        from: 'smartrichads@gmail.com',
-        to: 'payments@smartrichads.com',
-        subject: `New ${paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} Payment Submission`,
-        html: emailContent
+    // Validate method-specific fields
+    if (paymentMethod === 'stripe') {
+        if (!cardNumber || !expiryDate || !cvc) {
+            return res.status(400).json({ error: 'Missing Stripe payment details' });
+        }
+    } else if (paymentMethod === 'paypal') {
+        if (!paypalEmail) {
+            return res.status(400).json({ error: 'Missing PayPal email' });
+        }
+    }
+
+    const paymentData = {
+        user: req.user.userId, // Use req.user.userId from the auth middleware
+        amount,
+        paymentMethod,
+        status: 'pending',
+        paymentDetails: {}
     };
 
+    // Add payment method-specific details
+    if (paymentMethod === 'stripe') {
+        paymentData.paymentDetails = {
+            cardLast4: cardNumber.slice(-4),
+            expiryDate: expiryDate
+        };
+    } else {
+        paymentData.paymentDetails = {
+            paypalEmail: paypalEmail
+        };
+    }
+
     try {
+        // Create and save payment record
+        const payment = new Payment(paymentData);
+        await payment.save();
+
+        // Prepare email content based on payment method
+        let emailContent;
+        if (paymentMethod === 'stripe') {
+            emailContent = `
+                <h3>New Stripe Payment Submission</h3>
+                <p><strong>Payment Method:</strong> Stripe</p>
+                <p><strong>Amount:</strong> $${amount}</p>
+                <p><strong>Card Number:</strong> **** **** **** ${cardNumber.slice(-4)}</p>
+                <p><strong>Expiry Date:</strong> ${expiryDate}</p>
+                <p><em>Note: Full card details are intentionally masked for security</em></p>
+            `;
+        } else {
+            emailContent = `
+                <h3>New PayPal Payment Submission</h3>
+                <p><strong>Payment Method:</strong> PayPal</p>
+                <p><strong>Amount:</strong> $${amount}</p>
+                <p><strong>PayPal Email:</strong> ${paypalEmail}</p>
+            `;
+        }
+
+        // Email options
+        const mailOptions = {
+            from: 'smartrichads@gmail.com',
+            to: 'payments@smartrichads.com',
+            subject: `New ${paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} Payment Submission`,
+            html: emailContent
+        };
+
         // Send email
         await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Payment information submitted successfully' });
+
+        res.status(200).json({ 
+            message: 'Payment information submitted successfully',
+            paymentId: payment._id
+        });
     } catch (error) {
-        console.error('Error sending payment email:', error);
-        res.status(500).json({ error: 'Failed to submit payment information' });
+        console.error('Payment submission error:', error);
+        res.status(500).json({ error: 'Failed to submit payment information', details: error.message });
+    }
+});
+
+
+// Add this route to server.js
+app.get('/api/payment/status', auth, async (req, res) => {
+    try {
+        // Find the most recent payment for the user
+        const payment = await Payment.findOne({ 
+            user: req.user.userId 
+        }).sort({ createdAt: -1 });
+
+        if (!payment) {
+            return res.status(404).json({ message: 'No payment found' });
+        }
+
+        res.json({ 
+            status: payment.status,
+            amount: payment.amount
+        });
+    } catch (error) {
+        console.error('Error fetching payment status:', error);
+        res.status(500).json({ message: 'Error checking payment status' });
+    }
+});
+app.get('/api/payment/:id/status', auth, async (req, res) => {
+    try {
+        const payment = await Payment.findById(req.params.id);
+        if (!payment) {
+            return res.status(404).json({ error: 'Payment not found' });
+        }
+        res.json({ status: payment.status });
+    } catch (error) {
+        res.status(500).json({ error: 'Error checking payment status' });
     }
 });
 
@@ -204,6 +285,30 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password, userType } = req.body;
 
+        // Hardcoded admin login
+        if (email === 'admin@mail.com' && password === 'admin123') {
+            // Create admin token
+            const token = jwt.sign(
+                { userId: 'admin', userType: 'admin' },
+                process.env.JWT_SECRET,
+                { expiresIn: '24h' }
+            );
+
+            // Set cookie
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            });
+
+            return res.json({ 
+                success: true,
+                userType: 'admin',
+                name: 'Admin'
+            });
+        }
+
+        // Regular user login
         // Validate input
         if (!email || !password) {
             return res.status(400).json({ 
@@ -273,13 +378,85 @@ app.post('/api/logout', (req, res) => {
     res.clearCookie('token');
     res.json({ success: true });
 });
+// Admin routes for payment management
+app.get('/api/admin/payments', auth, async (req, res) => {
+    // Check if user is admin
+    if (req.user.userType !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    try {
+        // Fetch all payment requests
+        const payments = await Payment.find().sort({ createdAt: -1 });
+        res.json(payments);
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        res.status(500).json({ message: 'Error fetching payment requests' });
+    }
+});
+
+app.patch('/api/admin/payments/:id', auth, async (req, res) => {
+    // Check if user is admin
+    if (req.user.userType !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    try {
+        // Find and update payment
+        const payment = await Payment.findByIdAndUpdate(
+            id, 
+            { status }, 
+            { new: true, runValidators: true }
+        );
+
+        if (!payment) {
+            return res.status(404).json({ message: 'Payment not found' });
+        }
+
+        // Optional: Send notification email about payment status
+        const mailOptions = {
+            from: 'smartrichads@gmail.com',
+            to: 'payments@smartrichads.com', // Or fetch user's email from payment record
+            subject: `Payment ${status.toUpperCase()}`,
+            html: `
+                <h3>Payment ${status.toUpperCase()}</h3>
+                <p>Payment of $${payment.amount} has been ${status}.</p>
+                <p>Payment Method: ${payment.paymentMethod}</p>
+            `
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (emailError) {
+            console.error('Error sending notification email:', emailError);
+        }
+
+        res.json(payment);
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ message: 'Error updating payment status' });
+    }
+});
 
 
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'dashboard.html'));
+});
 
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, '..' , 'frontend', 'index.html'));
 });
+
+
 
   
 
