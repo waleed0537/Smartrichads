@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema({
         enum: ['affiliate', 'advertiser'],
         required: true
     },
+    // Added Google ID field for OAuth authentication
+    googleId: {
+        type: String,
+        sparse: true,
+        unique: true
+    },
     createdAt: {
         type: Date,
         default: Date.now

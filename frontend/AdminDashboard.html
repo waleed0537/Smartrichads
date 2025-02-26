@@ -1,84 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Richads</title>
-    <link rel="stylesheet" href="./css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Import a clean, modern font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
         :root {
             --primary-color: #6d28d9;
+            --primary-light: #8b5cf6;
+            --primary-dark: #5b21b6;
             --secondary-color: #10b981;
             --danger-color: #ef4444;
+            --warning-color: #f59e0b;
             --bg-light: #f9fafb;
+            --bg-dark: #111827;
             --text-dark: #1f2937;
             --text-medium: #374151;
             --text-light: #6b7280;
             --border-color: #e5e7eb;
             --white: #ffffff;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-    
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-    
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background-color: var(--bg-light);
             color: var(--text-medium);
             line-height: 1.6;
+            min-height: 100vh;
         }
-    
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Dashboard Layout */
         .dashboard {
             display: flex;
             min-height: 100vh;
-            background-color: var(--bg-light);
         }
-    
+
         /* Sidebar Styling */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background-color: var(--white);
             border-right: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem 0;
-            transition: width 0.3s ease;
-        }
-    
-        .close-menu {
-            display: none;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-        }
-    
-        .nav-menu {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, width 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 50;
             display: flex;
             flex-direction: column;
-            height: 100%;
         }
-    
+
+        .sidebar-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
         .nav-menu ul {
             list-style: none;
-            flex-grow: 1;
+            padding: 0 1rem;
         }
-    
+
         .nav-menu ul li {
-            margin: 0.25rem 0.75rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease;
+            margin: 0.5rem 0;
         }
-    
+
         .nav-menu ul li a {
             display: flex;
             align-items: center;
@@ -90,47 +110,83 @@
             border-radius: 0.5rem;
             transition: all 0.2s ease;
         }
-    
-        .nav-menu ul li.active a,
-        .nav-menu ul li a:hover {
-            background-color: rgba(109, 40, 217, 0.05);
+
+        .nav-menu ul li.active a {
+            background-color: rgba(109, 40, 217, 0.1);
             color: var(--primary-color);
         }
-    
+
+        .nav-menu ul li a:hover {
+            background-color: rgba(109, 40, 217, 0.05);
+            color: var(--primary-dark);
+        }
+
         .nav-menu ul li a i {
             width: 1.25rem;
             text-align: center;
+            font-size: 1.1rem;
             color: var(--text-light);
             transition: color 0.2s ease;
         }
-    
+
         .nav-menu ul li.active a i,
         .nav-menu ul li a:hover i {
             color: var(--primary-color);
         }
-    
-        .logout-section {
-            margin-top: auto;
-            border-top: 1px solid var(--border-color);
-            padding: 1rem 0.75rem;
+
+        .sidebar-icon-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            margin-left: auto;
         }
-    
+
+        .sidebar-icon-badge i {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+        }
+
+        .nav-menu ul li.active .sidebar-icon-badge i {
+            color: var(--primary-color);
+            opacity: 1;
+        }
+
+        .logout-section {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
         .logout-link {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            color: var(--text-light);
+            color: var(--danger-color);
             text-decoration: none;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             transition: background-color 0.2s ease;
+            font-weight: 500;
         }
-    
+
         .logout-link:hover {
             background-color: rgba(239, 68, 68, 0.05);
-            color: var(--danger-color);
         }
-    
+
+        .logout-link i {
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
         /* Top Navigation */
         .top-nav {
             display: flex;
@@ -140,20 +196,23 @@
             background-color: var(--white);
             border-bottom: 1px solid var(--border-color);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-    
+
         .top-nav h1 {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--text-dark);
         }
-    
+
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
         }
-    
+
         .icon-button {
             background: none;
             border: none;
@@ -162,100 +221,189 @@
             border-radius: 0.375rem;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-    
+
         .icon-button:hover {
             background-color: var(--bg-light);
+            color: var(--text-medium);
         }
-    
-        /* Payment Details */
+
+        .mobile-menu-toggle {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: transparent;
+            border: none;
+            color: var(--text-medium);
+            font-size: 1.25rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 50%;
+        }
+
+        /* Content Area */
         .content-area {
             padding: 1.5rem;
+            flex-grow: 1;
         }
-    
-        .payment-details {
-            background-color: var(--white);
-            border-radius: 0.75rem;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
-        }
-    
-        .payment-item {
+
+        /* View Toggles */
+        .view-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--bg-light);
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
         }
-    
-        .payment-item:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-    
-        .payment-info {
+
+        .view-filters {
             display: flex;
-            flex-direction: column;
             gap: 0.5rem;
         }
-    
-        .payment-info strong {
-            font-size: 1.125rem;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-    
-        .payment-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-    
-        .approve-btn, .reject-btn {
+
+        .filter-btn {
             padding: 0.5rem 1rem;
-            border: 1px solid transparent;
+            background: var(--white);
+            border: 1px solid var(--border-color);
             border-radius: 0.375rem;
             font-size: 0.875rem;
             font-weight: 500;
-            text-transform: uppercase;
+            color: var(--text-medium);
             cursor: pointer;
             transition: all 0.2s ease;
-            display: inline-flex;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: var(--bg-light);
+        }
+
+        .view-toggles {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-toggle-btn {
+            padding: 0.5rem;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            color: var(--text-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-toggle-btn.active {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .view-toggle-btn:hover:not(.active) {
+            background: var(--bg-light);
+        }
+
+        /* Payment Request Card View */
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .payment-card {
+            background: var(--white);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .payment-amount {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .payment-method {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-light);
+            display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-    
-        .approve-btn {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: var(--secondary-color);
-            border-color: rgba(16, 185, 129, 0.2);
+
+        .payment-method i {
+            font-size: 1.25rem;
         }
-    
-        .reject-btn {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
-            border-color: rgba(239, 68, 68, 0.2);
+
+        .payment-details {
+            margin-bottom: 1rem;
         }
-    
-        .approve-btn:hover {
-            background-color: rgba(16, 185, 129, 0.2);
+
+        .payment-details p {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-medium);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-    
-        .reject-btn:hover {
-            background-color: rgba(239, 68, 68, 0.2);
+
+        .payment-details p i {
+            color: var(--text-light);
+            width: 1rem;
+            text-align: center;
         }
-    
-        .approve-btn:disabled,
-        .reject-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+
+        .payment-metadata {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
         }
-    
-        .status-tag {
+
+        .payment-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .payment-status {
             display: inline-block;
             padding: 0.25rem 0.5rem;
             border-radius: 0.25rem;
@@ -263,76 +411,357 @@
             font-weight: 500;
             text-transform: capitalize;
         }
-    
+
         .status-pending {
-            color: #d97706;
-            background-color: rgba(217, 119, 6, 0.1);
+            color: var(--warning-color);
+            background-color: rgba(245, 158, 11, 0.1);
         }
-    
+
         .status-approved {
             color: var(--secondary-color);
             background-color: rgba(16, 185, 129, 0.1);
         }
-    
+
         .status-rejected {
             color: var(--danger-color);
             background-color: rgba(239, 68, 68, 0.1);
         }
-    
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -260px;
-                height: 100%;
-                z-index: 1000;
-                transition: left 0.3s ease;
+
+        .payment-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-approve {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--secondary-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-approve:hover {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-reject {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-reject:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Payment Request List View */
+        .payment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .payment-list-item {
+            background: var(--white);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .payment-list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-list-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .payment-list-amount {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            min-width: 100px;
+        }
+
+        .payment-list-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+        }
+
+        .payment-list-method {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .payment-list-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .payment-list-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .payment-list-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* Payment Request Table View */
+        .payment-table-container {
+            overflow-x: auto;
+            background: var(--white);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .payment-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .payment-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-light);
+        }
+
+        .payment-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .payment-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .payment-table tr:hover td {
+            background-color: rgba(249, 250, 251, 0.5);
+        }
+
+        .payment-table .payment-amount {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .payment-table .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+            max-width: 400px;
+        }
+
+        /* Mobile Overlay */
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
             }
-    
-            .sidebar.active {
-                left: 0;
-            }
-    
-            .close-menu {
-                display: block;
-            }
-    
-            .mobile-menu-toggle {
-                display: block;
-                position: fixed;
-                top: 1rem;
-                left: 1rem;
-                z-index: 1100;
-                background-color: var(--white);
-                border: 1px solid var(--border-color);
-                padding: 0.5rem;
-                border-radius: 0.375rem;
+            100% {
+                transform: rotate(360deg);
             }
         }
-        .nav-menu ul li a {
-    position: relative;
-}
 
-.sidebar-icon-badge {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.7;
-}
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .payment-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
 
-.sidebar-icon-badge i {
-    color: var(--primary-color);
-    font-size: 0.875rem;
-}
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1002;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-area {
+                overflow-x: hidden;
+            }
 
-.nav-menu ul li.active .sidebar-icon-badge i {
-    color: var(--primary-color);
-    opacity: 1;
-}
+            .top-nav {
+                padding-left: 4rem;
+            }
+
+            .mobile-overlay.active {
+                z-index: 1001;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .view-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .view-filters {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .payment-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .payment-list-info {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .payment-list-actions {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobile-menu-toggle {
+                top: 0.75rem;
+                left: 0.75rem;
+            }
+            
+            .top-nav {
+                padding: 0.75rem 0.75rem 0.75rem 3.5rem;
+            }
+            
+            .payment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-nav h1 {
+                font-size: 1.25rem;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+
+            .payment-card {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Mobile Menu Toggle Button -->
@@ -340,18 +769,22 @@
             <i class="fa-solid fa-bars"></i>
         </button>
 
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
         <!-- Left Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
-            <div>
-                <button class="close-menu" onclick="toggleSidebar()">
-                    <i class="fa-solid fa-times"></i>
-                </button>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Richads Admin</span>
+                </div>
             </div>
 
             <nav class="nav-menu">
                 <ul>
-                    <li class="active">
-                        <a href="#approve-payments">
+                    <li class="active" id="navPayments">
+                        <a href="#approve-payments" onclick="setActiveNavItem('navPayments')">
                             <i class="fa-solid fa-money-bill-transfer"></i>
                             <span>Approve Payments</span>
                             <span class="sidebar-icon-badge">
@@ -359,27 +792,42 @@
                             </span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#users">
+                    <li id="navUsers">
+                        <a href="#users" onclick="setActiveNavItem('navUsers')">
                             <i class="fa-solid fa-users"></i>
                             <span>User Management</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#reports">
+                    <li id="navReports">
+                        <a href="#reports" onclick="setActiveNavItem('navReports')">
                             <i class="fa-solid fa-chart-line"></i>
                             <span>Reports</span>
                         </a>
                     </li>
+                    <li id="navSettings">
+                        <a href="#settings" onclick="setActiveNavItem('navSettings')">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li id="navNotifications">
+                        <a href="#notifications" onclick="setActiveNavItem('navNotifications')">
+                            <i class="fa-solid fa-bell"></i>
+                            <span>Notifications</span>
+                            <span class="sidebar-icon-badge">
+                                <i class="fa-solid fa-circle"></i>
+                            </span>
+                        </a>
+                    </li>
                 </ul>
-
-                <div class="logout-section">
-                    <a href="#logout" class="logout-link" onclick="logout()">
-                        <i class="fa-solid fa-sign-out-alt"></i>
-                        <span>Log out</span>
-                    </a>
-                </div>
             </nav>
+
+            <div class="logout-section">
+                <a href="#logout" class="logout-link" onclick="logout()">
+                    <i class="fa-solid fa-sign-out-alt"></i>
+                    <span>Log out</span>
+                </a>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -390,176 +838,553 @@
                 <div class="header-actions">
                     <button class="icon-button"><i class="fa-solid fa-bell"></i></button>
                     <button class="icon-button"><i class="fa-solid fa-search"></i></button>
+                    <button class="icon-button"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                 </div>
             </header>
 
             <div class="content-area">
-                <div class="payment-details" id="paymentRequests">
-                    <!-- Payment requests will be dynamically loaded here -->
+                <!-- View Controls -->
+                <div class="view-controls">
+                    <div class="view-filters">
+                        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All
+                            Payments</button>
+                        <button class="filter-btn" data-filter="pending" onclick="setFilter('pending')">Pending</button>
+                        <button class="filter-btn" data-filter="approved"
+                            onclick="setFilter('approved')">Approved</button>
+                        <button class="filter-btn" data-filter="rejected"
+                            onclick="setFilter('rejected')">Rejected</button>
+                    </div>
+                    <div class="view-toggles">
+                        <button class="view-toggle-btn active" data-view="card" title="Card View"
+                            onclick="setView('card')">
+                            <i class="fa-solid fa-grid-2"></i>
+                        </button>
+                        <button class="view-toggle-btn" data-view="list" title="List View" onclick="setView('list')">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                        <button class="view-toggle-btn" data-view="table" title="Table View" onclick="setView('table')">
+                            <i class="fa-solid fa-table-list"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                </div>
+
+                <!-- Payment Requests - Card View -->
+                <div class="payment-view-container hidden" id="cardView">
+                    <div class="payment-grid" id="paymentGrid">
+                        <!-- Payment cards will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Payment Requests - List View -->
+                <div class="payment-view-container hidden" id="listView">
+                    <div class="payment-list" id="paymentList">
+                        <!-- Payment list items will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Payment Requests - Table View -->
+                <div class="payment-view-container hidden" id="tableView">
+                    <div class="payment-table-container">
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Details</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBody">
+                                <!-- Payment table rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state hidden" id="emptyState">
+                    <div class="empty-state-icon">
+                        <i class="fa-solid fa-money-bill-transfer"></i>
+                    </div>
+                    <h2>No payment requests found</h2>
+                    <p>When users submit payment requests, they will appear here for approval.</p>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Sidebar toggle functionality
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const body = document.body;
-            sidebar.classList.toggle('active');
-            body.classList.toggle('menu-open');
+     
+// Safe property getter to prevent errors with nested properties
+function safeGetProperty(obj, path, defaultValue = 'N/A') {
+    return path.split('.').reduce((acc, part) => 
+        acc && acc[part] !== undefined ? acc[part] : defaultValue, obj);
+}
 
-            let overlay = document.getElementById('mobileOverlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'mobileOverlay';
-                overlay.className = 'mobile-overlay';
-                overlay.onclick = toggleSidebar;
-                document.body.appendChild(overlay);
-            }
-            overlay.classList.toggle('active');
-        }
+// Set active navigation item
+function setActiveNavItem(itemId) {
+    // Remove active class from all nav items
+    document.querySelectorAll('.nav-menu li').forEach(item => {
+        item.classList.remove('active');
+    });
 
-        // Logout functionality
-        function logout() {
-            localStorage.clear();
-            fetch('/api/logout', { 
-                method: 'POST',
-                credentials: 'include'
-            }).then(() => {
-                window.location.href = '/frontend/login.html';
-            }).catch(error => {
-                console.error('Logout error:', error);
-            });
-        }
+    // Add active class to the clicked item
+    const activeItem = document.getElementById(itemId);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
 
-        // Fetch and display payment requests
-       // Fetch and display payment requests
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        toggleSidebar();
+    }
+
+    // Determine which view to load
+    switch(itemId) {
+        case 'navPayments':
+            fetchPaymentRequests();
+            break;
+        // Add other navigation item handlers as needed
+        default:
+            console.log(`No specific action defined for ${itemId}`);
+    }
+}
+
+// Toggle sidebar function
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    if (sidebar && mobileOverlay) {
+        sidebar.classList.toggle('active');
+        mobileOverlay.classList.toggle('active');
+
+        // Prevent body scrolling when sidebar is open
+        document.body.classList.toggle('overflow-hidden');
+    }
+}
+
+// Logout function
+function logout() {
+    localStorage.clear();
+    fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+    }).then(() => {
+        window.location.href = '/frontend/login.html';
+    }).catch(error => {
+        console.error('Logout error:', error);
+    });
+}
+
+// Initialize variables
+let currentFilter = 'all';
+let currentView = 'card';
+let payments = [];
+
+// DOM elements
+const cardView = document.getElementById('cardView');
+const listView = document.getElementById('listView');
+const tableView = document.getElementById('tableView');
+const emptyState = document.getElementById('emptyState');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const paymentGrid = document.getElementById('paymentGrid');
+const paymentList = document.getElementById('paymentList');
+const paymentTableBody = document.getElementById('paymentTableBody');
+
+// Format date function
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Fetch payment requests from API
 async function fetchPaymentRequests() {
     try {
+        console.log('Fetching payment requests...'); // Debug log
+
+        // Show loading spinner
+        if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+        
+        // Hide all views
+        if (cardView) cardView.classList.add('hidden');
+        if (listView) listView.classList.add('hidden');
+        if (tableView) tableView.classList.add('hidden');
+        if (emptyState) emptyState.classList.add('hidden');
+
         const response = await fetch('/api/admin/payments', {
             method: 'GET',
+            credentials: 'include', // Important for sending cookies
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('Response status:', response.status); // Log response status
+
+        if (response.status === 401) {
+            console.error('Authentication required');
+            window.location.href = '/frontend/login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response text:', errorText);
+            throw new Error('Failed to fetch payment requests');
+        }
+
+        payments = await response.json();
+        console.log('Fetched payments:', payments); // Debug log to check data
+        
+        // Hide loading spinner
+        if (loadingSpinner) loadingSpinner.classList.add('hidden');
+        
+        if (payments.length === 0) {
+            // No payments found
+            if (emptyState) emptyState.classList.remove('hidden');
+            return;
+        }
+        
+        // Refresh the view
+        refreshCurrentView(payments);
+    } catch (error) {
+        console.error('Complete error in fetchPaymentRequests:', error);
+        
+        // Hide loading spinner
+        if (loadingSpinner) loadingSpinner.classList.add('hidden');
+        
+        // Show error state
+        if (emptyState) {
+            emptyState.classList.remove('hidden');
+            emptyState.querySelector('h2').textContent = 'Error loading payment requests';
+            emptyState.querySelector('p').textContent = error.message || 'Please try again later or contact support.';
+        }
+    }
+}
+
+// Refresh current view based on filter and view type
+function refreshCurrentView(payments) {
+    // Filter payments
+    const filteredPayments = filterPayments(payments, currentFilter);
+
+    // Hide all views and loading spinner
+    if (cardView) cardView.classList.add('hidden');
+    if (listView) listView.classList.add('hidden');
+    if (tableView) tableView.classList.add('hidden');
+    if (emptyState) emptyState.classList.add('hidden');
+    if (loadingSpinner) loadingSpinner.classList.add('hidden');
+
+    // Show empty state if no payments
+    if (filteredPayments.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+    }
+
+    // Render the current view
+    if (currentView === 'card') {
+        renderCardView(filteredPayments);
+        if (cardView) cardView.classList.remove('hidden');
+    } else if (currentView === 'list') {
+        renderListView(filteredPayments);
+        if (listView) listView.classList.remove('hidden');
+    } else if (currentView === 'table') {
+        renderTableView(filteredPayments);
+        if (tableView) tableView.classList.remove('hidden');
+    }
+}
+
+// Filter payments function
+function filterPayments(payments, filter) {
+    if (filter === 'all') return payments;
+    return payments.filter(payment => payment.status === filter);
+}
+
+// Update payment status function
+async function updatePaymentStatus(paymentId, status) {
+    try {
+        // Show loading spinner
+        if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+        
+        const response = await fetch(`/api/admin/payments/${paymentId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status }),
             credentials: 'include'
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch payments');
+            throw new Error('Failed to update payment status');
         }
 
-        const payments = await response.json();
-        const container = document.getElementById('paymentRequests');
-        container.innerHTML = ''; // Clear existing content
+        // Refresh payment requests
+        fetchPaymentRequests();
 
-        if (payments.length === 0) {
-            container.innerHTML = `
-                <div class="no-payments-message">
-                    <p>No payment requests found.</p>
-                    <small>All payment requests will appear here for review.</small>
-                </div>
-            `;
-            return;
-        }
-
-        payments.forEach(payment => {
-            const paymentItem = document.createElement('div');
-            paymentItem.classList.add('payment-item');
-            
-            const formatDate = (dateString) => {
-                return new Date(dateString).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            };
-
-            const paymentInfo = `
-                <div class="payment-info">
-                    <strong>$${payment.amount.toFixed(2)}</strong>
-                    <div>
-                        <span>Method: ${payment.paymentMethod.toUpperCase()}</span>
-                        <span class="status-tag status-${payment.status.toLowerCase()}">
-                            ${payment.status}
-                        </span>
-                    </div>
-                    ${payment.paymentMethod === 'stripe' 
-                        ? `<span>Card Last 4: ${payment.paymentDetails.cardLast4}</span>`
-                        : `<span>PayPal Email: ${payment.paymentDetails.paypalEmail}</span>`
-                    }
-                    <small>Submitted: ${formatDate(payment.createdAt)}</small>
-                </div>
-            `;
-
-            const paymentActions = `
-                <div class="payment-actions">
-                    <button 
-                        class="approve-btn" 
-                        onclick="updatePaymentStatus('${payment._id}', 'approved')"
-                        ${payment.status !== 'pending' ? 'disabled' : ''}
-                    >
-                        <i class="fa-solid fa-check"></i> Approve
-                    </button>
-                    <button 
-                        class="reject-btn" 
-                        onclick="updatePaymentStatus('${payment._id}', 'rejected')"
-                        ${payment.status !== 'pending' ? 'disabled' : ''}
-                    >
-                        <i class="fa-solid fa-times"></i> Reject
-                    </button>
-                </div>
-            `;
-
-            paymentItem.innerHTML = paymentInfo + paymentActions;
-            container.appendChild(paymentItem);
-        });
     } catch (error) {
-        console.error('Error fetching payments:', error);
-        const container = document.getElementById('paymentRequests');
-        container.innerHTML = `
-            <div class="error-message">
-                <p>Error: ${error.message}</p>
-                <small>Unable to load payment requests. Please try again later.</small>
-            </div>
-        `;
+        console.error('Error updating payment status:', error);
+        alert(`Error: ${error.message}`);
+        
+        // Hide loading spinner
+        if (loadingSpinner) loadingSpinner.classList.add('hidden');
     }
 }
 
-        // Update payment status
-        async function updatePaymentStatus(paymentId, status) {
-            try {
-                const response = await fetch(`/api/admin/payments/${paymentId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status }),
-                    credentials: 'include'
-                });
+// Set filter function
+function setFilter(filter) {
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.dataset.filter === filter) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
 
-                if (!response.ok) {
-                    throw new Error('Failed to update payment status');
-                }
+    // Update current filter
+    currentFilter = filter;
 
-                // Refresh payment requests
-                fetchPaymentRequests();
-            } catch (error) {
-                console.error('Error updating payment status:', error);
-                alert(`Error: ${error.message}`);
-            }
+    // Refresh the view
+    if (payments.length > 0) {
+        refreshCurrentView(payments);
+    }
+}
+
+// Set view function
+function setView(view) {
+    // Update active view button
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        if (btn.dataset.view === view) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Update current view
+    currentView = view;
+
+    // Refresh the view
+    if (payments.length > 0) {
+        refreshCurrentView(payments);
+    }
+}
+
+// Render card view function
+function renderCardView(payments) {
+    if (!paymentGrid) return;
+    paymentGrid.innerHTML = '';
+
+    payments.forEach(payment => {
+        const card = document.createElement('div');
+        card.className = 'payment-card';
+
+        // Format card details based on payment method
+        let methodIcon, methodName, paymentDetail;
+        if (payment.paymentMethod === 'stripe') {
+            methodIcon = 'fa-brands fa-stripe';
+            methodName = 'Stripe';
+            
+            const cardLast4 = safeGetProperty(payment, 'paymentDetails.cardLast4');
+            const expiryDate = safeGetProperty(payment, 'paymentDetails.expiryDate');
+            
+            paymentDetail = `
+                <p><i class="fa-solid fa-credit-card"></i> Card ending in ${cardLast4}</p>
+                <p><i class="fa-regular fa-calendar"></i> Expires ${expiryDate}</p>
+            `;
+        } else {
+            methodIcon = 'fa-brands fa-paypal';
+            methodName = 'PayPal';
+            
+            const paypalEmail = safeGetProperty(payment, 'paymentDetails.paypalEmail');
+            
+            paymentDetail = `
+                <p><i class="fa-solid fa-envelope"></i> ${paypalEmail}</p>
+            `;
         }
 
-        // Check login status and user type
-        document.addEventListener('DOMContentLoaded', () => {
-            const userType = localStorage.getItem('userType');
-            if (userType !== 'admin') {
-                window.location.href = '/frontend/login.html';
-                return;
-            }
+        // Determine if buttons should be disabled based on status
+        const isDisabled = payment.status !== 'pending';
 
-            // Fetch payment requests on page load
-            fetchPaymentRequests();
+        card.innerHTML = `
+            <div class="payment-header">
+                <div class="payment-amount">${payment.amount.toFixed(2)}</div>
+                <div class="payment-method">
+                    <i class="${methodIcon}"></i>
+                    ${methodName}
+                </div>
+            </div>
+            <div class="payment-details">
+                ${paymentDetail}
+                <p><i class="fa-solid fa-user"></i> User ID: ${payment.user}</p>
+            </div>
+            <div class="payment-metadata">
+                <div class="payment-date">${formatDate(payment.createdAt)}</div>
+                <div class="payment-status status-${payment.status.toLowerCase()}">${payment.status}</div>
+            </div>
+            <div class="payment-actions">
+                <button class="btn btn-approve" onclick="updatePaymentStatus('${payment._id}', 'approved')" ${isDisabled ? 'disabled' : ''}>
+                    <i class="fa-solid fa-check"></i> Approve
+                </button>
+                <button class="btn btn-reject" onclick="updatePaymentStatus('${payment._id}', 'rejected')" ${isDisabled ? 'disabled' : ''}>
+                    <i class="fa-solid fa-xmark"></i> Reject
+                </button>
+            </div>
+        `;
+
+        paymentGrid.appendChild(card);
+    });
+}
+
+// Render list view function
+function renderListView(payments) {
+    if (!paymentList) return;
+    paymentList.innerHTML = '';
+
+    payments.forEach(payment => {
+        const listItem = document.createElement('div');
+        listItem.className = 'payment-list-item';
+
+        // Format card details based on payment method
+        let methodIcon, methodName, paymentDetail;
+        if (payment.paymentMethod === 'stripe') {
+            methodIcon = 'fa-brands fa-stripe';
+            methodName = 'Stripe';
+            
+            const cardLast4 = safeGetProperty(payment, 'paymentDetails.cardLast4');
+            
+            paymentDetail = `Card ending in ${cardLast4}`;
+        } else {
+            methodIcon = 'fa-brands fa-paypal';
+            methodName = 'PayPal';
+            
+            const paypalEmail = safeGetProperty(payment, 'paymentDetails.paypalEmail');
+            
+            paymentDetail = paypalEmail;
+        }
+
+        // Determine if buttons should be disabled based on status
+        const isDisabled = payment.status !== 'pending';
+
+        listItem.innerHTML = `
+            <div class="payment-list-info">
+                <div class="payment-list-amount">${payment.amount.toFixed(2)}</div>
+                <div class="payment-list-details">
+                    <div class="payment-list-method">
+                        <i class="${methodIcon}"></i>
+                        ${methodName} - ${paymentDetail}
+                    </div>
+                    <div class="payment-list-meta">
+                        <span class="payment-list-date">${formatDate(payment.createdAt)}</span>
+                        <span class="payment-status status-${payment.status.toLowerCase()}">${payment.status}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="payment-list-actions">
+                <button class="btn btn-approve" onclick="updatePaymentStatus('${payment._id}', 'approved')" ${isDisabled ? 'disabled' : ''}>
+                    <i class="fa-solid fa-check"></i> Approve
+                </button>
+                <button class="btn btn-reject" onclick="updatePaymentStatus('${payment._id}', 'rejected')" ${isDisabled ? 'disabled' : ''}>
+                    <i class="fa-solid fa-xmark"></i> Reject
+                </button>
+            </div>
+        `;
+
+        paymentList.appendChild(listItem);
+    });
+}
+
+// Render table view function
+function renderTableView(payments) {
+    if (!paymentTableBody) return;
+    paymentTableBody.innerHTML = '';
+
+    payments.forEach(payment => {
+        const tableRow = document.createElement('tr');
+
+        // Format card details based on payment method
+        let methodIcon, methodName, paymentDetail;
+        if (payment.paymentMethod === 'stripe') {
+            methodIcon = 'fa-brands fa-stripe';
+            methodName = 'Stripe';
+            
+            const cardLast4 = safeGetProperty(payment, 'paymentDetails.cardLast4');
+            
+            paymentDetail = `Card ending in ${cardLast4}`;
+        } else {
+            methodIcon = 'fa-brands fa-paypal';
+            methodName = 'PayPal';
+            
+            const paypalEmail = safeGetProperty(payment, 'paymentDetails.paypalEmail');
+            
+            paymentDetail = paypalEmail;
+        }
+
+        // Determine if buttons should be disabled based on status
+        const isDisabled = payment.status !== 'pending';
+
+        tableRow.innerHTML = `
+            <td class="payment-amount">${payment.amount.toFixed(2)}</td>
+            <td class="payment-method">
+                <i class="${methodIcon}"></i>
+                ${methodName}
+            </td>
+            <td>${paymentDetail}</td>
+            <td>${formatDate(payment.createdAt)}</td>
+            <td><span class="payment-status status-${payment.status.toLowerCase()}">${payment.status}</span></td>
+            <td>
+                <div class="payment-list-actions">
+                    <button class="btn btn-approve" onclick="updatePaymentStatus('${payment._id}', 'approved')" ${isDisabled ? 'disabled' : ''}>
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                    <button class="btn btn-reject" onclick="updatePay mentStatus('${payment._id}', 'rejected')" ${isDisabled ? 'disabled' : ''}>
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+
+        paymentTableBody.appendChild(tableRow);
+    });
+}
+
+// Add event listener to ensure functions are ready when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
+    
+    // Add click event listener to sidebar items
+    const sidebarItems = document.querySelectorAll('.nav-menu li a');
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', (event) => {
+            // Prevent default link behavior
+            event.preventDefault();
+            
+            // Get the parent li element's id
+            const parentId = event.currentTarget.closest('li').id;
+            
+            // Call setActiveNavItem with the parent's id
+            setActiveNavItem(parentId);
         });
-    </script>
+    });
+
+    // Initial setup for the default active view (Approve Payments)
+    setActiveNavItem('navPayments');
+});
+</script>
 </body>
+
 </html>

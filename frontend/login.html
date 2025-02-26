@@ -5,7 +5,91 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login - Richads</title>
         <link rel="stylesheet" href="./css/auth-styles.css">
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
     </head>
+    <style>
+        .social-login {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .social-login p {
+            margin-bottom: 15px;
+            color: #cbd5e1;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .social-login p::before,
+        .social-login p::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 70px;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-login p::before {
+            left: 30px;
+        }
+        
+        .social-login p::after {
+            right: 30px;
+        }
+        
+        .google-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #ffffff;
+            color: #4285F4;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .google-login-btn:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .google-logo {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .divider {
+            margin: 20px 0;
+            font-size: 14px;
+            color: #cbd5e1;
+            text-align: center;
+            position: relative;
+        }
+        
+        .divider::before, 
+        .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .divider::before {
+            left: 0;
+        }
+        
+        .divider::after {
+            right: 0;
+        }
+    </style>
     <body>
         <div class="stars">
             <div class="auth-container">
@@ -17,7 +101,19 @@
                         <button class="toggle-btn active" data-type="affiliate">As Affiliate</button>
                         <button class="toggle-btn" data-type="advertiser">As Advertiser</button>
                     </div>
-
+                    
+                    <div class="social-login">
+                        <button type="button" id="google-login-btn" class="google-login-btn">
+                            <svg class="google-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+                    </div>
+                    <div class="divider">or</div>
                     <form class="auth-form" id="loginForm">
                         <div class="error-label" id="errorLabel"></div>
                         
@@ -44,11 +140,24 @@
         <script>
             // Toggle button functionality
             document.querySelectorAll('.toggle-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                });
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
             });
+        });
+        // Google Login Button Click Handler
+        document.getElementById('google-login-btn').addEventListener('click', initiateGoogleLogin);
+
+        function initiateGoogleLogin() {
+            // Redirect to Google OAuth endpoint
+            const clientId = '256248220288-dnk063rlhuluq8g35agq9jmrnlbs7lfu.apps.googleusercontent.com'; // Replace with your actual client ID
+            const redirectUri = encodeURIComponent(window.location.origin + '/api/auth/google/callback');
+            const scope = encodeURIComponent('email profile');
+            const responseType = 'code';
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&prompt=select_account`;
+            
+            window.location.href = authUrl;
+        }
 
             // Form submission
             document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -150,6 +259,10 @@ function showError(message) {
     setTimeout(() => {
         errorLabel.classList.remove('show');
     }, 5000);
+}
+if (window.location.href.includes('error=access_denied')) {
+    console.error('OAuth Error:', window.location.href);
+    showError('Google login was denied or cancelled');
 }
         </script>
     </body>

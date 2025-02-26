@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Success - Redirecting...</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader"></div>
+        <h2>Authentication Successful</h2>
+        <p>Redirecting to dashboard...</p>
+    </div>
+
+    <script>
+        // Parse query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userType = urlParams.get('userType');
+        const name = urlParams.get('name');
+        
+        // Store in localStorage
+        if (userType) localStorage.setItem('userType', userType);
+        if (name) localStorage.setItem('userName', name);
+        
+        // Verify cookie is set before redirecting
+        function checkCookieAndRedirect() {
+            // Check if the cookie exists (this is a simple check, the actual token validation happens server-side)
+            const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+            const tokenCookie = cookies.find(cookie => cookie.startsWith('token='));
+            
+            if (tokenCookie) {
+                // Cookie exists, redirect to appropriate dashboard
+                if (userType === 'admin') {
+                    window.location.href = '/frontend/AdminDashboard.html';
+                } else {
+                    window.location.href = '/frontend/dashboard.html';
+                }
+            } else {
+                // Cookie doesn't exist yet, wait a bit longer
+                console.log("Waiting for auth cookie to be set...");
+                setTimeout(checkCookieAndRedirect, 500);
+            }
+        }
+        
+        // Start checking for cookie after a short delay
+        setTimeout(checkCookieAndRedirect, 1000);
+    </script>
+</body>
+</html>

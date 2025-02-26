@@ -380,14 +380,19 @@ app.post('/api/logout', (req, res) => {
 });
 // Admin routes for payment management
 app.get('/api/admin/payments', auth, async (req, res) => {
+    console.log('Admin payments request received');
+    console.log('User type:', req.user.userType);
+
     // Check if user is admin
     if (req.user.userType !== 'admin') {
+        console.log('Access denied - not an admin');
         return res.status(403).json({ message: 'Access denied' });
     }
 
     try {
         // Fetch all payment requests
         const payments = await Payment.find().sort({ createdAt: -1 });
+        console.log('Payments found:', payments.length);
         res.json(payments);
     } catch (error) {
         console.error('Error fetching payments:', error);
