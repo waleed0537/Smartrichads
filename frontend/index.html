@@ -165,6 +165,7 @@
     </style>
     <style id='global-styles-inline-css' type='text/css'>
         body {
+
             --wp--preset--color--black: #000000;
             --wp--preset--color--cyan-bluish-gray: #abb8c3;
             --wp--preset--color--white: #ffffff;
@@ -649,10 +650,75 @@
         .wp-block-embed.aligncenter {
             text-align: center !important;
         }
+        .page-loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000000;
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    }
+
+    .loader-content {
+        text-align: center;
+        color: white;
+    }
+
+    .spinner {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #0085FF;
+        border-right-color: #FFA500;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    .loader-content h2 {
+        font-size: 28px;
+        margin-bottom: 10px;
+        opacity: 0.9;
+    }
+
+    .loader-content p {
+        font-size: 16px;
+        opacity: 0.7;
+    }
+
+    .page-loader-overlay.loaded {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Prevent content flash during loading */
+    body {
+        overflow: hidden;
+    }
+    
+    body.content-loaded {
+        overflow: auto;
+    }
     </style>
 </head>
 
 <body class="home page-template-default page page-id-9">
+    <div id="page-loader" class="page-loader-overlay">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <h2>Loading Richads</h2>
+            <p>Please wait while we prepare everything for you...</p>
+        </div>
+    </div>
     <script type="text/javascript">
         window.onload = function () {
             // Define the functions directly
@@ -1490,6 +1556,72 @@
         }
     });
 });
+document.addEventListener('DOMContentLoaded', function() {
+        // Track loading progress
+        let loadedImagesCount = 0;
+        let totalImagesCount = 0;
+        
+        // Get all images including those in CSS backgrounds (approximation)
+        const images = document.querySelectorAll('img');
+        totalImagesCount = images.length;
+        
+        // Handle case when there are no images
+        if (totalImagesCount === 0) {
+            hideLoader();
+            return;
+        }
+        
+        // Set a maximum timeout in case some images fail to load
+        const loaderTimeout = setTimeout(hideLoader, 10000); // 10 seconds max
+        
+        // Create a counter for loaded images
+        function imageLoaded() {
+            loadedImagesCount++;
+            if (loadedImagesCount >= totalImagesCount) {
+                clearTimeout(loaderTimeout);
+                hideLoader();
+            }
+        }
+        
+        // Check for already cached/loaded images
+        images.forEach(img => {
+            // If the image is already loaded or has no src
+            if (!img.src || img.complete) {
+                imageLoaded();
+            } else {
+                // Add load and error event listeners
+                img.addEventListener('load', imageLoaded);
+                img.addEventListener('error', imageLoaded); // Count errors as "loaded" to avoid hanging
+            }
+        });
+        
+        // Handle lazy-loaded images
+        const lazyImages = document.querySelectorAll('[data-src]');
+        lazyImages.forEach(img => {
+            // If this is a lazy-loaded image that wasn't counted above
+            if (!img.src) {
+                totalImagesCount++;
+                img.addEventListener('load', imageLoaded);
+                img.addEventListener('error', imageLoaded);
+            }
+        });
+        
+        // Hide the loader
+        function hideLoader() {
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.classList.add('loaded');
+                document.body.classList.add('content-loaded');
+                
+                // Remove loader from DOM after transition completes
+                setTimeout(() => {
+                    if (loader.parentNode) {
+                        loader.parentNode.removeChild(loader);
+                    }
+                }, 500);
+            }
+        }
+    });
     </script>
 </body>
 
