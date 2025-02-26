@@ -151,7 +151,11 @@
         function initiateGoogleLogin() {
             // Redirect to Google OAuth endpoint
             const clientId = '256248220288-dnk063rlhuluq8g35agq9jmrnlbs7lfu.apps.googleusercontent.com'; // Replace with your actual client ID
-            const redirectUri = encodeURIComponent(window.location.origin + '/api/auth/google/callback');
+            const redirectUri = encodeURIComponent(
+  window.location.origin === 'https://smartrichads.onrender.com' 
+    ? 'https://www.smartrichads.com/api/auth/google/callback'
+    : window.location.origin + '/api/auth/google/callback'
+);
             const scope = encodeURIComponent('email profile');
             const responseType = 'code';
             const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&prompt=select_account`;
