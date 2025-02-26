@@ -1,16 +1,52 @@
-const express = require('express');
-const router = express.Router();
-const axios = require('axios');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+// Simple auth handler for Richads application
+const authHandler = {
+    // Simple function to check if user is logged in
+    isLoggedIn: function() {
+      return document.cookie.includes('token=');
+    },
+    
+    // Simple logout function
+    logout: function() {
+      // Clear localStorage
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userName');
+      
+      // Call the logout API
+      fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      }).then(() => {
+        // Redirect to login page
+        window.location.href = '/frontend/login.html';
+      }).catch(error => {
+        console.error('Logout error:', error);
+        // Redirect anyway
+        window.location.href = '/frontend/login.html';
+      });
+    },
+    
+    // Process OAuth redirect
+    processOAuthRedirect: function() {
+      // Check if we have a code parameter (OAuth callback)
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (code) {
+        console.log('Processing OAuth redirect');
+        
+        // Clean up URL
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        
+        return true;
+      }
+      
+      return false;
+    }
+    
+  };
+  // Updated Google OAuth callback route in authRoutes.js
 
-// Existing auth routes
-const authController = require('../controllers/authController');
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
-
-// Google OAuth routes
 router.get('/auth/google/callback', async (req, res) => {
     const { code } = req.query;
     
@@ -76,11 +112,12 @@ router.get('/auth/google/callback', async (req, res) => {
         });
         
         // Store user info in localStorage via a redirect
-        return res.redirect(`/frontend/auth-success.html?userType=${user.userType}&name=${encodeURIComponent(user.name)}`);
+        // Updated to include email and googleAuth flag
+        return res.redirect(
+            `/frontend/auth-success.html?userType=${user.userType}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(email)}&googleAuth=true`
+        );
     } catch (error) {
         console.error('Google OAuth error:', error);
         return res.redirect('/frontend/login.html?error=Authentication+failed');
     }
 });
-
-module.exports = router;

@@ -45,33 +45,30 @@
         const urlParams = new URLSearchParams(window.location.search);
         const userType = urlParams.get('userType');
         const name = urlParams.get('name');
+        const email = urlParams.get('email'); // Added email parameter
         
         // Store in localStorage
         if (userType) localStorage.setItem('userType', userType);
         if (name) localStorage.setItem('userName', name);
+        if (email) localStorage.setItem('userEmail', email);
         
-        // Verify cookie is set before redirecting
-        function checkCookieAndRedirect() {
-            // Check if the cookie exists (this is a simple check, the actual token validation happens server-side)
-            const cookies = document.cookie.split(';').map(cookie => cookie.trim());
-            const tokenCookie = cookies.find(cookie => cookie.startsWith('token='));
-            
-            if (tokenCookie) {
-                // Cookie exists, redirect to appropriate dashboard
-                if (userType === 'admin') {
-                    window.location.href = '/frontend/AdminDashboard.html';
-                } else {
-                    window.location.href = '/frontend/dashboard.html';
-                }
+        // Set Google authentication flag
+        const isGoogleAuth = urlParams.get('googleAuth') === 'true';
+        if (isGoogleAuth) {
+            localStorage.setItem('googleAuth', 'true');
+        }
+        
+        // Redirect to appropriate dashboard
+        function redirectToDashboard() {
+            if (userType === 'admin') {
+                window.location.href = '/frontend/AdminDashboard.html';
             } else {
-                // Cookie doesn't exist yet, wait a bit longer
-                console.log("Waiting for auth cookie to be set...");
-                setTimeout(checkCookieAndRedirect, 500);
+                window.location.href = '/frontend/dashboard.html';
             }
         }
         
-        // Start checking for cookie after a short delay
-        setTimeout(checkCookieAndRedirect, 1000);
+        // Redirect after a short delay
+        setTimeout(redirectToDashboard, 1500);
     </script>
 </body>
 </html>

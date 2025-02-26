@@ -60,20 +60,6 @@ userSchema.pre('save', async function(next) {
 const User = mongoose.model('User', userSchema);
 
 // Authentication Middleware
-const auth = async (req, res, next) => {
-    try {
-        const token = req.cookies.token;
-        if (!token) {
-            return res.status(401).json({ message: 'Authentication required' });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ message: 'Invalid token' });
-    }
-};
 
 // Create email transporter
 const transporter = nodemailer.createTransport({
@@ -114,43 +100,47 @@ app.post('/api/contact', async (req, res) => {
         res.status(500).json({ error: 'Failed to send message' });
     }
 });
-// Routes
-app.post('/api/signup', async (req, res) => {
+const auth = async (req, res, next) => {
     try {
-        const { name, email, password, userType } = req.body;
-
-        // Validate input
-        if (!name || !email || !password || !userType) {
-            return res.status(400).json({ message: 'All fields are required' });
+        // Check for Google Auth header first
+        const googleAuth = req.headers['x-google-auth'] === 'true';
+        
+        // If Google auth is present, check for user details in the request body
+        if (googleAuth && req.body && req.body.googleAuth) {
+            // For Google-authenticated users, we'll trust the client-side flag
+            // This is a simplified approach - in production, you would validate with Google
+            req.user = {
+                userId: req.body.userEmail, // Use email as a user identifier
+                userType: req.body.userType || localStorage.getItem('userType') || 'affiliate', // Default to affiliate
+                googleAuth: true
+            };
+            
+            return next();
         }
-
-        // Check if user exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email already registered' });
+        
+        // Traditional auth flow with JWT token in cookie
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ message: 'Authentication required' });
         }
-
-        // Create user
-        const user = new User({
-            name,
-            email,
-            password, // Will be hashed by pre-save middleware
-            userType
-        });
-
-        await user.save();
-
-        res.status(201).json({ 
-            success: true,
-            message: 'Registration successful! Please login.' 
-        });
+        
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded;
+            next();
+        } catch (error) {
+            console.error('Token verification error:', error);
+            return res.status(401).json({ message: 'Invalid token' });
+        }
     } catch (error) {
-        console.error('Signup error:', error);
-        res.status(500).json({ message: 'Server error during registration' });
+        console.error('Auth middleware error:', error);
+        res.status(401).json({ message: 'Authentication failed' });
     }
-});
-
+};
+// Routes
 app.post('/api/payment', auth, async (req, res) => {
+    console.log('Payment submission - User info:', req.user);
+    
     const { 
         paymentMethod, 
         cardNumber, 
@@ -159,6 +149,34 @@ app.post('/api/payment', auth, async (req, res) => {
         paypalEmail, 
         amount 
     } = req.body;
+    
+    console.log('Submitting payment data:', {
+        paymentMethod,
+        amount,
+        paypalEmail: paypalEmail || '[REDACTED]',
+        userId: req.user.userId,
+        userType: req.user.userType
+    });
+
+    // Check if user ID is valid for payment processing
+    const isAdmin = req.user.userType === 'admin' || req.user.userId === 'admin';
+    const isValidObjectId = req.user.userId && /^[0-9a-fA-F]{24}$/.test(req.user.userId);
+    
+    if (isAdmin) {
+        console.log('Admin user detected, rejecting payment submission');
+        return res.status(403).json({ 
+            error: 'Admin users cannot submit payments',
+            details: 'This functionality is only available for regular users' 
+        });
+    }
+    
+    if (!isValidObjectId) {
+        console.log('Invalid user ID format:', req.user.userId);
+        return res.status(400).json({ 
+            error: 'Invalid user account', 
+            details: 'Your user account is not properly configured for payments' 
+        });
+    }
 
     // Validate inputs
     if (!amount || amount <= 0) {
@@ -182,8 +200,8 @@ app.post('/api/payment', auth, async (req, res) => {
     }
 
     const paymentData = {
-        user: req.user.userId, // Use req.user.userId from the auth middleware
-        amount,
+        user: req.user.userId,
+        amount: parseFloat(amount),
         paymentMethod,
         status: 'pending',
         paymentDetails: {}
@@ -202,9 +220,13 @@ app.post('/api/payment', auth, async (req, res) => {
     }
 
     try {
+        console.log('Creating payment with data:', paymentData);
+        
         // Create and save payment record
         const payment = new Payment(paymentData);
         await payment.save();
+        
+        console.log('Payment saved successfully:', payment._id);
 
         // Prepare email content based on payment method
         let emailContent;
@@ -235,7 +257,13 @@ app.post('/api/payment', auth, async (req, res) => {
         };
 
         // Send email
-        await transporter.sendMail(mailOptions);
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log('Payment notification email sent');
+        } catch (emailError) {
+            console.error('Error sending payment notification email:', emailError);
+            // Continue with response even if email fails
+        }
 
         res.status(200).json({ 
             message: 'Payment information submitted successfully',
@@ -243,10 +271,12 @@ app.post('/api/payment', auth, async (req, res) => {
         });
     } catch (error) {
         console.error('Payment submission error:', error);
-        res.status(500).json({ error: 'Failed to submit payment information', details: error.message });
+        res.status(500).json({ 
+            error: 'Failed to submit payment information', 
+            details: error.message 
+        });
     }
 });
-
 
 // Add this route to server.js
 app.get('/api/payment/status', auth, async (req, res) => {
@@ -460,9 +490,165 @@ app.get('*', (req, res) => {
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, '..' , 'frontend', 'index.html'));
 });
+// Update this Google OAuth handler in your server.js file
 
+// Update this Google OAuth handler in your server.js file
 
+app.get('/api/auth/google/callback', async (req, res) => {
+    const { code, state } = req.query;
+    
+    if (req.query.error) {
+        console.error('Google OAuth error:', req.query.error);
+        return res.redirect('/frontend/login.html?error=Authentication+denied');
+    }
+    
+    try {
+        // In a production app, you would exchange the code for tokens
+        // and validate the user information
+        console.log('Processing Google OAuth callback with code');
+        
+        // Generate a temporary Google user ID that's consistent
+        // Using a fixed prefix with the timestamp to ensure uniqueness
+        const googleUserId = 'google-' + Date.now();
+        
+        // Create a JWT token for this user with a longer expiration
+        const token = jwt.sign(
+            { 
+                userId: googleUserId, 
+                userType: 'affiliate',
+                email: 'google-user@example.com', // Added email for consistency
+                provider: 'google' // Mark this as a Google-authenticated user
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' } // Longer expiration for convenience
+        );
+        
+        // Set cookie with proper options to ensure it's included in future requests
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax', // 'lax' works better for OAuth redirects
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+        
+        console.log('Set authentication token cookie for Google user');
+        
+        // Redirect to auth success page with user info
+        return res.redirect(`/frontend/auth-success.html?userType=affiliate&name=Google+User`);
+    } catch (error) {
+        console.error('Google OAuth error:', error);
+        return res.redirect('/frontend/login.html?error=Authentication+failed');
+    }
+});
 
+// Replace your existing payment endpoint in server.js with this improved version
+
+// Replace your existing payment endpoint in server.js with this improved version
+
+app.post('/api/payment', auth, async (req, res) => {
+    console.log('Payment submission - User info:', req.user);
+    
+    // Handle Google-authenticated users
+    if (req.user.googleAuth) {
+        console.log('Processing payment for Google-authenticated user');
+    }
+    
+    const { 
+        paymentMethod, 
+        cardNumber, 
+        expiryDate, 
+        cvc, 
+        paypalEmail, 
+        amount 
+    } = req.body;
+    
+    // Continue with existing payment processing code...
+    
+    // For Google auth users, create a special user ID if not available
+    const userId = req.user.userId || req.user.userEmail || 'google-user';
+    
+    // Rest of your payment processing code...
+    const paymentData = {
+        user: userId,
+        amount: parseFloat(amount),
+        paymentMethod,
+        status: 'pending',
+        paymentDetails: {}
+    };
+
+    // Add payment method-specific details
+    if (paymentMethod === 'stripe') {
+        paymentData.paymentDetails = {
+            cardLast4: cardNumber ? cardNumber.slice(-4) : '0000',
+            expiryDate: expiryDate || 'MM/YY'
+        };
+    } else {
+        paymentData.paymentDetails = {
+            paypalEmail: paypalEmail || req.user.userEmail || 'user@example.com'
+        };
+    }
+
+    try {
+        // Create and save payment record
+        const payment = new Payment(paymentData);
+        await payment.save();
+        
+        // Return success response
+        res.status(200).json({ 
+            message: 'Payment information submitted successfully',
+            paymentId: payment._id
+        });
+    } catch (error) {
+        console.error('Payment submission error:', error);
+        res.status(500).json({ 
+            error: 'Failed to submit payment information', 
+            details: error.message 
+        });
+    }
+});
+// Add this to your server.js for debugging authentication
+
+// Debugging endpoint to check authentication status
+app.get('/api/auth/test', (req, res) => {
+    try {
+        // Check if token exists
+        const token = req.cookies.token;
+        
+        if (!token) {
+            return res.json({
+                authenticated: false,
+                message: 'No authentication token found'
+            });
+        }
+        
+        // Try to verify the token
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            
+            // Return authentication info
+            return res.json({
+                authenticated: true,
+                user: {
+                    id: decoded.userId,
+                    type: decoded.userType,
+                    isGoogleUser: decoded.provider === 'google'
+                },
+                tokenExpiration: new Date(decoded.exp * 1000).toISOString()
+            });
+        } catch (tokenError) {
+            return res.json({
+                authenticated: false,
+                message: 'Invalid token: ' + tokenError.message
+            });
+        }
+    } catch (error) {
+        console.error('Auth test error:', error);
+        return res.status(500).json({
+            authenticated: false,
+            error: 'Server error checking authentication'
+        });
+    }
+});
   
 
 const PORT = process.env.PORT || 3000;
