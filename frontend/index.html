@@ -1565,8 +1565,8 @@
     // Get the loader element
     const loader = document.getElementById('page-loader');
     
-    // Set a fixed timeout of 5 seconds
-    const loaderTimeout = 5000; // 5 seconds
+    // Set a fixed timeout of 7 seconds
+    const loaderTimeout = 7000; // 7 seconds
     
     // Function to hide the loader
     function hideLoader() {
@@ -1584,35 +1584,8 @@
         }, 500); // 500ms for the transition to complete
     }
     
-    // Show a loading percentage that increases over time
-    const startTime = Date.now();
-    const loaderText = loader.querySelector('p');
-    const originalText = loaderText ? loaderText.textContent : '';
-    
-    // Update the loading text every 100ms
-    const updateInterval = setInterval(() => {
-        if (!loaderText) return;
-        
-        const elapsed = Date.now() - startTime;
-        const percentage = Math.min(Math.floor((elapsed / loaderTimeout) * 100), 99);
-        
-        // Update the text with the loading percentage
-        loaderText.textContent = `${originalText} (${percentage}%)`;
-        
-        // Clear interval when done
-        if (percentage >= 99) {
-            clearInterval(updateInterval);
-        }
-    }, 100);
-    
     // Hide loader after the fixed timeout
-    setTimeout(() => {
-        clearInterval(updateInterval);
-        if (loaderText) {
-            loaderText.textContent = `${originalText} (100%)`;
-        }
-        hideLoader();
-    }, loaderTimeout);
+    setTimeout(hideLoader, loaderTimeout);
     
     // Also listen for window load event as a fallback
     window.addEventListener('load', function() {
