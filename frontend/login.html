@@ -6,89 +6,157 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Richads</title>
     <link rel="stylesheet" href="./css/auth-styles.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <style>
-    .social-login {
-        margin-top: 20px;
-        text-align: center;
+    .user-type-toggle {
+        display: flex;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 4px;
     }
 
-    .social-login p {
-        margin-bottom: 15px;
+    .toggle-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 10px;
         color: #cbd5e1;
         font-size: 14px;
-        position: relative;
-    }
-
-    .social-login p::before,
-    .social-login p::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 70px;
-        height: 1px;
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .social-login p::before {
-        left: 30px;
-    }
-
-    .social-login p::after {
-        right: 30px;
-    }
-
-    .google-login-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        background-color: #ffffff;
-        color: #4285F4;
-        border: none;
-        border-radius: 50px;
-        padding: 12px 16px;
-        font-size: 14px;
-        font-weight: 500;
         cursor: pointer;
-        width: 100%;
+        border-radius: 6px;
         transition: all 0.3s ease;
     }
 
-    .google-login-btn:hover {
-        background-color: #f1f1f1;
+    .toggle-btn.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
     }
 
-    .google-logo {
-        width: 20px;
-        height: 20px;
-    }
-
-    .divider {
-        margin: 20px 0;
+    .error-label {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
         font-size: 14px;
-        color: #cbd5e1;
-        text-align: center;
-        position: relative;
+        display: none;
     }
 
-    .divider::before,
-    .divider::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 40%;
-        height: 1px;
+    .error-label.show {
+        display: block;
+    }
+
+    .auth-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .auth-box {
+        background-color: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .auth-box h1 {
+        color: white;
+        font-size: 24px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .subtitle {
+        color: #cbd5e1;
+        font-size: 14px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .auth-form {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #cbd5e1;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.3);
         background-color: rgba(255, 255, 255, 0.1);
     }
 
-    .divider::before {
-        left: 0;
+    .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
     }
 
-    .divider::after {
-        right: 0;
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background-color: #3b82f6;
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #2563eb;
+    }
+
+    .switch-auth {
+        margin-top: 20px;
+        text-align: center;
+        color: #cbd5e1;
+        font-size: 14px;
+    }
+
+    .switch-auth a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .switch-auth a:hover {
+        text-decoration: underline;
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        overflow: hidden;
     }
 </style>
 
@@ -104,22 +172,6 @@
                     <button class="toggle-btn" data-type="advertiser">As Advertiser</button>
                 </div>
 
-                <div class="social-login">
-                    <button type="button" id="google-login-btn" class="google-login-btn">
-                        <svg class="google-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                            <path fill="#FFC107"
-                                d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-                            <path fill="#FF3D00"
-                                d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-                            <path fill="#4CAF50"
-                                d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-                            <path fill="#1976D2"
-                                d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
-                        </svg>
-                        Continue with Google
-                    </button>
-                </div>
-                <div class="divider">or</div>
                 <form class="auth-form" id="loginForm">
                     <div class="error-label" id="errorLabel"></div>
 
@@ -151,36 +203,7 @@
                 button.classList.add('active');
             });
         });
-        // Google Login Button Click Handler
-        document.getElementById('google-login-btn').addEventListener('click', initiateGoogleLogin);
 
-
-        function initiateGoogleLogin() {
-    // Google OAuth configuration
-    const clientId = '256248220288-dnk063rlhuluq8g35agq9jmrnlbs7lfu.apps.googleusercontent.com'; // Your client ID
-    
-    // Get current domain for redirect URI
-    const currentOrigin = window.location.origin;
-    const redirectUri = encodeURIComponent(`${currentOrigin}/api/auth/google/callback`);
-    
-    // Google OAuth scopes
-    const scope = encodeURIComponent('email profile');
-    
-    // Response type - code for server-side flow
-    const responseType = 'code';
-    
-    // State parameter for security
-    const state = Math.random().toString(36).substring(2);
-    
-    // Store state in localStorage (for verification)
-    localStorage.setItem('googleOAuthState', state);
-    
-    // Construct auth URL
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&state=${state}&prompt=consent`;
-    
-    // Redirect to Google login
-    window.location.href = authUrl;
-}
         document.addEventListener('DOMContentLoaded', function () {
             // Check if there's an error in the URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -188,55 +211,74 @@
 
             if (error) {
                 showError(decodeURIComponent(error).replace(/\+/g, ' '));
-
                 // Clean up the URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
+
         // Form submission
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+    e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorLabel = document.getElementById('errorLabel');
+    
+    // Clear previous errors
+    errorLabel.classList.remove('show');
 
-            const formData = {
-                email: email,
-                password: password,
-                userType: email === 'admin@mail.com' ? 'admin' :
-                    document.querySelector('.toggle-btn.active').dataset.type
-            };
+    const formData = {
+        email: email,
+        password: password,
+        userType: email === 'admin@mail.com' ? 'admin' :
+            document.querySelector('.toggle-btn.active').dataset.type
+    };
 
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData),
-                    credentials: 'include'
-                });
+    try {
+        // Show loading indicator
+        document.querySelector('.submit-btn').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Logging in...';
+        document.querySelector('.submit-btn').disabled = true;
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    localStorage.setItem('userType', data.userType);
-                    localStorage.setItem('userName', data.name);
-
-                    // Redirect based on user type
-                    if (email === 'admin@mail.com') {
-                        window.location.href = '/frontend/AdminDashboard.html';
-                    } else {
-                        window.location.href = '/frontend/dashboard.html';
-                    }
-                } else {
-                    showError(data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showError('An error occurred. Please try again.');
-            }
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData),
+            credentials: 'include'
         });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Store user data
+            localStorage.setItem('userType', data.userType);
+            localStorage.setItem('userName', data.name);
+            
+            // Set flag to check payment status on dashboard load
+            localStorage.setItem('checkPaymentStatus', 'true');
+
+            // Redirect based on user type
+            if (data.userType === 'admin') {
+                window.location.href = '/frontend/AdminDashboard.html';
+            } else {
+                // Redirect to dashboard
+                window.location.href = '/frontend/dashboard.html';
+            }
+        } else {
+            // Reset button and show error
+            document.querySelector('.submit-btn').innerHTML = 'Log In';
+            document.querySelector('.submit-btn').disabled = false;
+            showError(data.message || 'Login failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // Reset button and show error
+        document.querySelector('.submit-btn').innerHTML = 'Log In';
+        document.querySelector('.submit-btn').disabled = false;
+        showError('An error occurred. Please try again.');
+    }
+});
 
         // Error display function
         function showError(message) {
@@ -249,65 +291,6 @@
                 errorLabel.classList.remove('show');
             }, 5000);
         }
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            const formData = {
-                email: email,
-                password: password,
-                userType: email === 'admin@mail.com' ? 'admin' :
-                    document.querySelector('.toggle-btn.active').dataset.type
-            };
-
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData),
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    localStorage.setItem('userType', data.userType);
-                    localStorage.setItem('userName', data.name);
-
-                    // Redirect based on user type
-                    if (email === 'admin@mail.com') {
-                        window.location.href = '/frontend/AdminDashboard.html';
-                    } else {
-                        window.location.href = '/frontend/dashboard.html';
-                    }
-                } else {
-                    showError(data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showError('An error occurred. Please try again.');
-            }
-        });
-
-        function showError(message) {
-            const errorLabel = document.getElementById('errorLabel');
-            errorLabel.textContent = message;
-            errorLabel.classList.add('show');
-
-            // Hide error after 5 seconds
-            setTimeout(() => {
-                errorLabel.classList.remove('show');
-            }, 5000);
-        }
-        if (window.location.href.includes('error=access_denied')) {
-            console.error('OAuth Error:', window.location.href);
-            showError('Google login was denied or cancelled');
-        }
-
     </script>
 </body>
 

@@ -10,7 +10,9 @@ const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const Payment = require('./models/payment');
 
-
+//Run commands
+// cd backend 
+// node server.js
 
 // Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -287,16 +289,26 @@ app.get('/api/payment/status', auth, async (req, res) => {
         }).sort({ createdAt: -1 });
 
         if (!payment) {
-            return res.status(404).json({ message: 'No payment found' });
+            return res.status(404).json({ 
+                message: 'No payment found',
+                status: 'none'
+            });
         }
 
+        // Return payment details including amount
         res.json({ 
             status: payment.status,
-            amount: payment.amount
+            amount: payment.amount,
+            method: payment.paymentMethod,
+            createdAt: payment.createdAt,
+            paymentId: payment._id
         });
     } catch (error) {
         console.error('Error fetching payment status:', error);
-        res.status(500).json({ message: 'Error checking payment status' });
+        res.status(500).json({ 
+            message: 'Error checking payment status',
+            error: error.message 
+        });
     }
 });
 app.get('/api/payment/:id/status', auth, async (req, res) => {

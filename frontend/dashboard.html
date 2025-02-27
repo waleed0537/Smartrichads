@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="/css/create-campaign.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        .mobile-menu-toggle {
+        display: none; /* Hidden by default */
+        /* Keep your existing mobile styles here */
+    }
         .date-filter {
             position: relative;
             display: inline-block;
@@ -118,6 +122,26 @@
         }
 
         @media (max-width: 768px) {
+            .mobile-menu-toggle {
+            display: flex; /* Show only on mobile */
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: #ffffff;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Keep existing mobile sidebar styles */
+        .sidebar {
+            transform: translateX(-100%);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
             .date-picker-popup {
                 position: fixed;
                 top: 50%;
@@ -1906,6 +1930,145 @@
 
         // Call initialization function when DOM is loaded
         document.addEventListener('DOMContentLoaded', initializeDashboard);
+        // Enhanced submit button loader functionality
+function setupSubmitButtonLoader() {
+    const paymentForm = document.querySelector('.payment-form-content');
+    const submitButton = paymentForm.querySelector('.submit-button');
+
+    // Add loader styles
+    const loaderStyles = `
+    <style>
+        .submit-button {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .submit-button .button-text {
+            transition: opacity 0.2s ease;
+        }
+        .submit-button .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        .submit-button.loading .button-text {
+            opacity: 0;
+        }
+        .submit-button.loading .loader {
+            display: block;
+        }
+        .loader-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>`;
+
+    // Wrap button text and add loader
+    submitButton.innerHTML = `
+        ${loaderStyles}
+        <span class="button-text">Submit for Approval</span>
+        <div class="loader">
+            <div class="loader-spinner"></div>
+        </div>
+    `;
+
+    // Modify form submission to handle loading state
+    paymentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Show loading state
+        submitButton.classList.add('loading');
+        submitButton.disabled = true;
+
+        try {
+            // Your existing payment submission logic here
+            const currentPaymentMethod = document.querySelector('.payment-method.active').querySelector('i').classList.contains('fa-stripe') ? 'stripe' : 'paypal';
+
+            // Validate form
+            if (!validateForm(currentPaymentMethod)) {
+                throw new Error('Validation failed');
+            }
+
+            // Prepare form data
+            let formData = {
+                paymentMethod: currentPaymentMethod,
+                amount: this.querySelector('input[name="amount"]').value
+            };
+
+            // Add method-specific details
+            if (currentPaymentMethod === 'stripe') {
+                formData.cardNumber = this.querySelector('input[name="cardNumber"]').value.replace(/\s/g, '');
+                formData.expiryDate = this.querySelector('input[name="expiryDate"]').value;
+                formData.cvc = this.querySelector('input[name="cvc"]').value;
+            } else {
+                formData.paypalEmail = document.getElementById('paypalEmail').value;
+            }
+
+            // Submit payment
+            const response = await fetch('/api/payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    credentials: 'include'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Payment submission failed');
+            }
+
+            const data = await response.json();
+
+            // Show verification page
+            const verificationPage = document.getElementById('verificationPage');
+            const paymentFormContainer = document.getElementById('paymentForm');
+
+            if (verificationPage && paymentFormContainer) {
+                verificationPage.classList.remove('hidden');
+                paymentFormContainer.classList.add('hidden');
+
+                // Reset form
+                this.reset();
+                selectPaymentMethod('stripe');
+
+                // Check payment status
+                if (data.paymentId) {
+                    checkPaymentStatus(data.paymentId);
+                }
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+
+            // Show error message
+            const statusLabel = document.querySelector('.payment-status-label') || 
+                document.createElement('div');
+            statusLabel.className = 'payment-status-label error';
+            statusLabel.textContent = error.message || 'An error occurred. Please try again.';
+            
+            if (!document.querySelector('.payment-status-label')) {
+                this.appendChild(statusLabel);
+            }
+        } finally {
+            // Always remove loading state
+            submitButton.classList.remove('loading');
+            submitButton.disabled = false;
+        }
+    });
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', setupSubmitButtonLoader);
     </script>
 
 </body>

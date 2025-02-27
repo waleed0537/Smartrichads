@@ -6,6 +6,224 @@
     <title>Sign Up - Richads</title>
     <link rel="stylesheet" href="./css/auth-styles.css">
 </head>
+<style>
+    .user-type-toggle {
+        display: flex;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 4px;
+    }
+
+    .toggle-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 10px;
+        color: #cbd5e1;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-btn.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .error-label {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .error-label.show {
+        display: block;
+    }
+
+    .success-label {
+        background-color: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .success-label.show {
+        display: block;
+    }
+
+    .auth-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .auth-box {
+        background-color: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .auth-box h1 {
+        color: white;
+        font-size: 24px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .subtitle {
+        color: #cbd5e1;
+        font-size: 14px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .auth-form {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        color: #cbd5e1;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.3);
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 38px;
+        background: none;
+        border: none;
+        color: #cbd5e1;
+        cursor: pointer;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background-color: #3b82f6;
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #2563eb;
+    }
+
+    .switch-auth {
+        margin-top: 20px;
+        text-align: center;
+        color: #cbd5e1;
+        font-size: 14px;
+    }
+
+    .switch-auth a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .switch-auth a:hover {
+        text-decoration: underline;
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        overflow: hidden;
+    }
+
+    .password-strength {
+        margin-top: 5px;
+        height: 5px;
+        border-radius: 3px;
+        background: #333;
+        overflow: hidden;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #ef4444;
+        width: 33%;
+    }
+
+    .strength-medium {
+        background: #f59e0b;
+        width: 66%;
+    }
+
+    .strength-strong {
+        background: #22c55e;
+        width: 100%;
+    }
+
+    .password-strength-text {
+        margin-top: 3px;
+        font-size: 12px;
+        color: #cbd5e1;
+        text-align: right;
+    }
+
+    .password-hint {
+        margin-top: 3px;
+        font-size: 12px;
+        color: #cbd5e1;
+    }
+</style>
 <body>
     <div class="stars">
         <div class="auth-container">
@@ -20,6 +238,8 @@
 
                 <form class="auth-form" id="signupForm">
                     <div class="error-label" id="errorLabel"></div>
+                    <div class="success-label" id="successLabel"></div>
+                    
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" name="name" required placeholder="Enter your name">
@@ -34,9 +254,21 @@
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required 
                                placeholder="Create a password" minlength="6">
+                        <button type="button" class="password-toggle" id="passwordToggle">Show</button>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                        </div>
+                        <div class="password-strength-text" id="passwordStrengthText"></div>
+                        <div class="password-hint">Use at least 6 characters, including letters and numbers</div>
                     </div>
 
-                    <button type="submit" class="submit-btn">Sign Up</button>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required 
+                               placeholder="Confirm your password">
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitButton">Sign Up</button>
                 </form>
 
                 <p class="switch-auth">
@@ -47,15 +279,33 @@
     </div>
 
     <script>
+        // Function to show error message
         function showError(message) {
-        const errorLabel = document.getElementById('errorLabel');
-        errorLabel.textContent = message;
-        errorLabel.classList.add('show');
+            const errorLabel = document.getElementById('errorLabel');
+            const successLabel = document.getElementById('successLabel');
+            
+            // Hide success message if showing an error
+            successLabel.classList.remove('show');
+            
+            errorLabel.textContent = message;
+            errorLabel.classList.add('show');
+            
+            setTimeout(() => {
+                errorLabel.classList.remove('show');
+            }, 5000);
+        }
         
-        setTimeout(() => {
+        // Function to show success message
+        function showSuccess(message) {
+            const errorLabel = document.getElementById('errorLabel');
+            const successLabel = document.getElementById('successLabel');
+            
+            // Hide error message if showing a success
             errorLabel.classList.remove('show');
-        }, 5000);
-    }
+            
+            successLabel.textContent = message;
+            successLabel.classList.add('show');
+        }
 
         // Toggle button functionality
         document.querySelectorAll('.toggle-btn').forEach(button => {
@@ -64,19 +314,89 @@
                 button.classList.add('active');
             });
         });
+        
+        // Password visibility toggle
+        const passwordToggle = document.getElementById('passwordToggle');
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        
+        passwordToggle.addEventListener('click', () => {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            confirmPasswordField.setAttribute('type', type);
+            passwordToggle.textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+        
+        // Password strength indicator
+        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+        const passwordStrengthText = document.getElementById('passwordStrengthText');
+        
+        passwordField.addEventListener('input', () => {
+            const password = passwordField.value;
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 6) strength += 1;
+            if (password.length >= 10) strength += 1;
+            
+            // Complexity check
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Update strength indicator
+            passwordStrengthBar.className = 'password-strength-bar';
+            
+            if (password.length === 0) {
+                passwordStrengthBar.style.width = '0%';
+                passwordStrengthText.textContent = '';
+            } else if (strength < 3) {
+                passwordStrengthBar.classList.add('strength-weak');
+                passwordStrengthText.textContent = 'Weak';
+                passwordStrengthText.style.color = '#ef4444';
+            } else if (strength < 5) {
+                passwordStrengthBar.classList.add('strength-medium');
+                passwordStrengthText.textContent = 'Medium';
+                passwordStrengthText.style.color = '#f59e0b';
+            } else {
+                passwordStrengthBar.classList.add('strength-strong');
+                passwordStrengthText.textContent = 'Strong';
+                passwordStrengthText.style.color = '#22c55e';
+            }
+        });
 
         // Form submission
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const userType = document.querySelector('.toggle-btn.active').dataset.type;
-        const errorLabel = document.getElementById('errorLabel');
-        errorLabel.classList.remove('show');
+            e.preventDefault();
+            
+            const userType = document.querySelector('.toggle-btn.active').dataset.type;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Password match validation
+            if (password !== confirmPassword) {
+                showError("Passwords don't match. Please try again.");
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError("Please enter a valid email address.");
+                return;
+            }
+            
+            // Disable submit button during API call
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Signing up...';
             
             const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
+                name: name,
+                email: email,
+                password: password,
                 userType: userType
             };
 
@@ -92,17 +412,24 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showError(data.message);
-                    window.location.href = '/frontend/login.html';
+                    showSuccess(data.message || "Account created successfully!");
+                    
+                    // Redirect to login page after short delay
+                    setTimeout(() => {
+                        window.location.href = '/frontend/login.html';
+                    }, 2000);
                 } else {
-                    showError(data.message);
+                    showError(data.message || "An error occurred during signup.");
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError(data.message);
+                showError("An error occurred during signup. Please try again.");
+            } finally {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign Up';
             }
         });
-        
     </script>
 </body>
 </html>
