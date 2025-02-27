@@ -1561,93 +1561,144 @@
                 }
             });
         });
-        document.addEventListener('DOMContentLoaded', function () {
-            // Track loading progress
-            let loadedResourcesCount = 0;
-            let totalResourcesToTrack = 0;
-            const loader = document.getElementById('page-loader');
-            const startTime = performance.now();
-            const minDisplayTime = 1000; // Minimum time to show loader in milliseconds
-
-            // Get all images (both regular and lazysizes)
-            const regularImages = Array.from(document.querySelectorAll('img:not(.lazyload)'));
-            const lazyImages = Array.from(document.querySelectorAll('img.lazyload, img[data-src]'));
-
-            // Count total resources to track
-            totalResourcesToTrack = regularImages.length + lazyImages.length;
-
-            // Make sure we have at least one resource to track
-            if (totalResourcesToTrack === 0) {
-                setTimeout(hideLoader, minDisplayTime);
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+    // Loader elements
+    const loader = document.getElementById('page-loader');
+    const startTime = performance.now();
+    const minDisplayTime = 1500; // Increased minimum display time
+    const maxWaitTime = 25000;   // Increased maximum wait time to 25 seconds
+    
+    // Tracking variables
+    let loadedImages = 0;
+    let totalImages = 0;
+    let lazyImagesFound = 0;
+    let lazyImagesLoaded = 0;
+    let hasHiddenLoader = false;
+    
+    // Find all images (both regular and lazysizes)
+    const regularImages = Array.from(document.querySelectorAll('img:not(.lazyload):not([data-src])'));
+    const lazyImages = Array.from(document.querySelectorAll('img.lazyload, img[data-src]'));
+    
+    // Initial count
+    totalImages = regularImages.length + lazyImages.length;
+    console.log(`Initial count: ${totalImages} images (${regularImages.length} regular, ${lazyImages.length} lazy)`);
+    
+    // Ensure we have a minimum number of images to track
+    if (totalImages < 2) {
+        totalImages = 2; // Set a minimum threshold
+    }
+    
+    // Loader hide function with checks
+    function attemptToHideLoader() {
+        if (hasHiddenLoader) return; // Prevent multiple calls
+        
+        const elapsedTime = performance.now() - startTime;
+        const allRegularLoaded = loadedImages >= regularImages.length;
+        const allLazyHandled = lazyImagesLoaded >= lazyImagesFound;
+        const minTimeElapsed = elapsedTime >= minDisplayTime;
+        
+        // Debug output
+        console.log(`Progress: ${loadedImages}/${regularImages.length} regular, ${lazyImagesLoaded}/${lazyImagesFound} lazy, elapsed: ${Math.round(elapsedTime)}ms`);
+        
+        // Only hide when conditions are met
+        if ((allRegularLoaded && allLazyHandled && minTimeElapsed) || elapsedTime >= maxWaitTime) {
+            hideLoader();
+        }
+    }
+    
+    // Actually hide the loader
+    function hideLoader() {
+        if (hasHiddenLoader || !loader) return;
+        
+        hasHiddenLoader = true;
+        console.log('Hiding loader');
+        
+        loader.classList.add('loaded');
+        document.body.classList.add('content-loaded');
+        
+        // Remove loader from DOM after transition completes
+        setTimeout(() => {
+            if (loader && loader.parentNode) {
+                loader.parentNode.removeChild(loader);
             }
-
-            // Set a maximum timeout in case some images fail to load
-            const loaderTimeout = setTimeout(hideLoader, 15000); // 15 seconds max
-
-            // Resource loaded handler
-            function resourceLoaded() {
-                loadedResourcesCount++;
-                if (loadedResourcesCount >= totalResourcesToTrack) {
-                    clearTimeout(loaderTimeout);
-
-                    // Make sure loader shows for at least minDisplayTime
-                    const elapsedTime = performance.now() - startTime;
-                    if (elapsedTime < minDisplayTime) {
-                        setTimeout(hideLoader, minDisplayTime - elapsedTime);
-                    } else {
-                        hideLoader();
-                    }
-                }
-            }
-
-            // Handle regular images
-            regularImages.forEach(img => {
-                if (img.complete) {
-                    resourceLoaded();
-                } else {
-                    img.addEventListener('load', resourceLoaded);
-                    img.addEventListener('error', resourceLoaded); // Count errors as "loaded"
-                }
+        }, 500);
+    }
+    
+    // Handle regular image loading
+    regularImages.forEach(img => {
+        if (img.complete) {
+            loadedImages++;
+            console.log(`Regular image already loaded: ${img.src || 'no-src'}`);
+        } else {
+            img.addEventListener('load', () => {
+                loadedImages++;
+                console.log(`Regular image loaded: ${img.src || 'no-src'}`);
+                attemptToHideLoader();
             });
-
-            // Handle lazy-loaded images
-            lazyImages.forEach(img => {
-                // Create an event listener for when lazysizes loads the image
-                img.addEventListener('lazyloaded', resourceLoaded);
-                img.addEventListener('lazyerror', resourceLoaded);
+            img.addEventListener('error', () => {
+                loadedImages++;
+                console.log(`Regular image error: ${img.src || 'no-src'}`);
+                attemptToHideLoader();
             });
-
-            // Also listen for the lazysizes loading complete event
-            document.addEventListener('lazybeforeunveil', function (e) {
-                // Add to total count for any newly unveiled images
-                if (!lazyImages.includes(e.target) && e.target.tagName === 'IMG') {
-                    totalResourcesToTrack++;
-                    e.target.addEventListener('load', resourceLoaded);
-                    e.target.addEventListener('error', resourceLoaded);
-                }
-            });
-
-            // Hide the loader with transition
-            function hideLoader() {
-                if (loader) {
-                    loader.classList.add('loaded');
-                    document.body.classList.add('content-loaded');
-
-                    // Remove loader from DOM after transition completes
-                    setTimeout(() => {
-                        if (loader && loader.parentNode) {
-                            loader.parentNode.removeChild(loader);
-                        }
-                    }, 500);
-                }
-            }
-
-            // Fallback - hide loader if window load event fires
-            window.addEventListener('load', function () {
-                setTimeout(hideLoader, 500); // Small delay to ensure everything is ready
-            });
+        }
+    });
+    
+    // Track lazysizes events globally
+    document.addEventListener('lazybeforeunveil', function(e) {
+        if (e.target.tagName === 'IMG') {
+            lazyImagesFound++;
+            console.log(`Lazy image unveiled: ${e.target.dataset.src || 'no-data-src'}`);
+        }
+    });
+    
+    document.addEventListener('lazyloaded', function(e) {
+        if (e.target.tagName === 'IMG') {
+            lazyImagesLoaded++;
+            console.log(`Lazy image loaded: ${e.target.src || 'no-src'}`);
+            attemptToHideLoader();
+        }
+    });
+    
+    // Handle lazy image loading explicitly
+    lazyImages.forEach(img => {
+        img.addEventListener('load', () => {
+            console.log(`Lazy image direct load event: ${img.src || 'no-src'}`);
+            attemptToHideLoader();
         });
+        img.addEventListener('error', () => {
+            console.log(`Lazy image direct error event: ${img.src || 'no-src'}`);
+            attemptToHideLoader();
+        });
+    });
+    
+    // Ensure loader hides even if something goes wrong
+    window.addEventListener('load', function() {
+        // Wait a bit longer after window load
+        setTimeout(() => {
+            if (!hasHiddenLoader) {
+                console.log('Fallback: Window load event triggered loader hide');
+                hideLoader();
+            }
+        }, 2000); // Wait 2 seconds after window load
+    });
+    
+    // Final fallback - maximum wait time
+    setTimeout(() => {
+        if (!hasHiddenLoader) {
+            console.log('Maximum wait time reached - forcing loader hide');
+            hideLoader();
+        }
+    }, maxWaitTime);
+    
+    // Check initial state
+    if (regularImages.length > 0 && regularImages.every(img => img.complete)) {
+        console.log('All regular images already loaded');
+        loadedImages = regularImages.length;
+    }
+    
+    // Initial check in case everything is already loaded
+    setTimeout(attemptToHideLoader, 100);
+});
     </script>
 </body>
 

@@ -11,10 +11,140 @@
     <link rel="stylesheet" href="/css/create-campaign.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Loading button styles */
+        .submit-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button .button-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .submit-button .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .submit-button.loading .button-text {
+            opacity: 0;
+        }
+
+        .submit-button.loading .loader {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Improved mobile sidebar styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 240px;
+                height: 100%;
+                position: fixed;
+                top: 0;
+                left: -240px;
+                z-index: 1000;
+                transition: transform 0.3s ease;
+                overflow-y: auto;
+                box-shadow: none;
+            }
+
+            .sidebar.active {
+                transform: translateX(240px);
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+
+            .mobile-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-menu {
+                padding-top: 60px;
+            }
+
+            .close-menu {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 1.2rem;
+                color: #6b7280;
+                cursor: pointer;
+                padding: 5px;
+                z-index: 1001;
+                display: block;
+            }
+
+            .top-nav {
+                padding-left: 60px;
+            }
+
+            .mobile-menu-toggle {
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 990;
+                background: rgba(255, 255, 255, 0.9);
+                border: none;
+                border-radius: 5px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                color: #374151;
+                cursor: pointer;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+        }
+
         .mobile-menu-toggle {
-        display: none; /* Hidden by default */
-        /* Keep your existing mobile styles here */
-    }
+    z-index: 1010; /* Increased z-index to be higher than notification */
+    position: fixed;
+    display: none; /* Hidden by default on desktop */
+}
+
         .date-filter {
             position: relative;
             display: inline-block;
@@ -36,6 +166,136 @@
 
         .date-filter-btn:hover {
             background: #e5e7eb;
+        }
+
+        .payment-notification {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            width: 100%;
+            position: relative;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1005;
+            animation: slideDown 0.5s ease-in-out;
+        }
+
+        .payment-notification.pending {
+            background-color: #FFF7E0;
+            border-bottom: 1px solid #F0D68A;
+            color: #8C6C15;
+        }
+
+        .payment-notification.approved {
+            background-color: #E6F7E9;
+            border-bottom: 1px solid #A2D9AC;
+            color: #1F7D32;
+        }
+
+        .payment-notification.rejected {
+            background-color: #FEEBEC;
+            border-bottom: 1px solid #F1A5A5;
+            color: #B42929;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .notification-icon {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .notification-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-action-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .pending .notification-action-btn {
+            color: #8C6C15;
+            border: 1px solid #F0D68A;
+        }
+
+        .pending .notification-action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .approved .notification-action-btn {
+            color: #1F7D32;
+            border: 1px solid #A2D9AC;
+        }
+
+        .approved .notification-action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .rejected .notification-action-btn {
+            color: #B42929;
+            border: 1px solid #F1A5A5;
+        }
+
+        .rejected .notification-action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Adjust content-area padding when notification is visible */
+        .content-area.with-notification {
+            padding-top: 0;
         }
 
         .date-picker-popup {
@@ -123,25 +383,55 @@
 
         @media (max-width: 768px) {
             .mobile-menu-toggle {
-            display: flex; /* Show only on mobile */
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1000;
-            background: #ffffff;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Keep existing mobile sidebar styles */
-        .sidebar {
-            transform: translateX(-100%);
-        }
-        .sidebar.active {
-            transform: translateX(0);
-        }
+                display: flex;
+                /* Show only on mobile */
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                z-index: 1000;
+                background: #ffffff;
+                border: none;
+                padding: 0.5rem;
+                border-radius: 0.375rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Keep existing mobile sidebar styles */
+            .sidebar {
+        z-index: 1008; /* Higher than notification but lower than toggle button */
+        width: 240px;
+        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        overflow-y: auto;
+    }
+    .mobile-overlay {
+        z-index: 1007;
+    }
+    
+    /* Adjust padding for the top nav to account for the toggle button */
+    .top-nav {
+        padding-left: 60px;
+    }
+    
+    /* Fix notification to ensure it doesn't push content */
+    .payment-notification {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+    
+    /* Adjust content area when notification is visible */
+    .content-area.with-notification {
+        padding-top: 60px; /* Add padding to account for fixed notification */
+    }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
             .date-picker-popup {
                 position: fixed;
                 top: 50%;
@@ -149,6 +439,15 @@
                 transform: translate(-50%, -50%);
                 width: 90%;
                 max-width: 320px;
+            }
+
+            .notification-message {
+                font-size: 12px;
+            }
+
+            .notification-actions {
+                flex-direction: column;
+                gap: 5px;
             }
         }
 
@@ -359,6 +658,22 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Payment Status Notification Bar -->
+            <div id="paymentNotification" class="payment-notification hidden">
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="notification-message" id="notificationMessage"></div>
+                </div>
+                <div class="notification-actions" id="notificationActions">
+                    <!-- Action buttons will be added dynamically -->
+                </div>
+                <button class="notification-close" onclick="closeNotification()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
             <!-- Top Navigation -->
             <header class="top-nav">
                 <h1>Offers</h1>
@@ -373,7 +688,7 @@
                 </div>
             </header>
 
-            <div class="content-area">
+            <div class="content-area" id="contentArea">
                 <!-- No Offers State -->
                 <div class="empty-state" id="emptyState">
                     <div class="megaphone-icon">
@@ -387,13 +702,15 @@
                     <div class="payment-form-header">
                         <h2>Add Funds</h2>
                     </div>
-                    <form class="payment-form-content">
+                    <form class="payment-form-content" id="paymentFormContent">
                         <div class="payment-methods">
-                            <button type="button" class="payment-method active" onclick="selectPaymentMethod('stripe')">
+                            <button type="button" class="payment-method active" onclick="selectPaymentMethod('stripe')"
+                                data-method="stripe">
                                 <i class="fa-brands fa-stripe"></i>
                                 <span></span>
                             </button>
-                            <button type="button" class="payment-method" onclick="selectPaymentMethod('paypal')">
+                            <button type="button" class="payment-method" onclick="selectPaymentMethod('paypal')"
+                                data-method="paypal">
                                 <i class="fa-brands fa-paypal"></i>
                                 <span></span>
                             </button>
@@ -401,35 +718,44 @@
 
                         <div class="form-section stripe-section">
                             <div class="form-group">
-                                <label>Card Number</label>
-                                <input type="text" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19"
-                                    required>
+                                <label for="cardNumber">Card Number</label>
+                                <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456"
+                                    maxlength="19" required>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Expiry Date</label>
-                                    <input type="text" name="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                                    <label for="expiryDate">Expiry Date</label>
+                                    <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY"
+                                        maxlength="5" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>CVC</label>
-                                    <input type="text" name="cvc" placeholder="123" maxlength="3" required>
+                                    <label for="cvc">CVC</label>
+                                    <input type="text" id="cvc" name="cvc" placeholder="123" maxlength="3" required>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-section paypal-section hidden">
                             <div class="form-group">
-                                <label>PayPal Email</label>
-                                <input type="email" name="paypalEmail" id="paypalEmail" placeholder="your@email.com">
+                                <label for="paypalEmail">PayPal Email</label>
+                                <input type="email" id="paypalEmail" name="paypalEmail" placeholder="your@email.com">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" name="amount" placeholder="Enter amount" min="1" step="0.01" required>
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" placeholder="Enter amount" min="1"
+                                step="0.01" required>
                         </div>
 
-                        <button type="submit" class="submit-button">Submit for Approval</button>
+                        <!-- Replace the submit button in the payment form with this improved version -->
+                        <button type="submit" class="submit-button">
+                            <span class="button-text">Submit for Approval</span>
+                            <div class="loader">
+                                <div class="loader-spinner"></div>
+                            </div>
+                        </button>
+                        <div class="payment-status-label"></div>
                     </form>
                 </div>
                 <div id="verificationPage" class="verification-container hidden">
@@ -776,31 +1102,56 @@
     <script>
         // Initialize variables
         let currentView = 'offers';
+        let currentPaymentStatus = null;
+        let lastPaymentId = null;
+        let paymentCheckInterval = null;
 
+        // Document ready function to set up the page
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize everything else
+            setupPaymentForm();
+            initializeDashboard();
+
+            // Check for payment status when the page loads
+            checkPaymentStatus();
+        });
+
+        // Toggle sidebar function
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const body = document.body;
-            sidebar.classList.toggle('active');
-            body.classList.toggle('menu-open');
-
-            let overlay = document.getElementById('mobileOverlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'mobileOverlay';
-                overlay.className = 'mobile-overlay';
-                overlay.onclick = toggleSidebar;
-                document.body.appendChild(overlay);
-            }
-            overlay.classList.toggle('active');
+    const sidebar = document.getElementById('sidebar');
+    
+    if (sidebar) {
+        sidebar.classList.toggle('active');
+        
+        // Handle mobile overlay
+        let overlay = document.getElementById('mobileOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'mobileOverlay';
+            overlay.className = 'mobile-overlay';
+            overlay.onclick = function() {
+                toggleSidebar(); // Close sidebar when overlay is clicked
+            };
+            document.body.appendChild(overlay);
         }
-
+        
+        // Toggle overlay active state
+        if (sidebar.classList.contains('active')) {
+            overlay.classList.add('active');
+        } else {
+            overlay.classList.remove('active');
+        }
+    }
+}
+        // Show section function
         function showSection(sectionId) {
             const sections = [
                 'emptyState',
                 'paymentForm',
                 'financesSection',
                 'campaignsSection',
-                'createCampaignSection'
+                'createCampaignSection',
+                'verificationPage'
             ];
 
             sections.forEach(section => {
@@ -823,6 +1174,9 @@
                 case 'financesSection':
                     topNavTitle.textContent = 'Finances';
                     break;
+                case 'paymentForm':
+                    topNavTitle.textContent = 'Add Funds';
+                    break;
                 default:
                     topNavTitle.textContent = 'Offers';
             }
@@ -844,6 +1198,9 @@
                 case 'financesSection':
                     activeSelector = 'a[href="#finances"]';
                     break;
+                case 'paymentForm':
+                    activeSelector = 'a[href="#add-funds"]';
+                    break;
                 default:
                     activeSelector = 'a[href="#offers"]';
             }
@@ -853,9 +1210,59 @@
                 activeNavItem.classList.add('active');
             }
         }
-        function validateForm(currentPaymentMethod) {
+
+        // Payment form toggle
+        function togglePaymentForm() {
+            showSection('paymentForm');
+
+            // Close the sidebar on mobile
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        // Payment method selection function
+        function selectPaymentMethod(method) {
+            const buttons = document.querySelectorAll('.payment-method');
+            const stripeSect = document.querySelector('.stripe-section');
+            const paypalSect = document.querySelector('.paypal-section');
+
+            // Get all input elements
+            const stripeInputs = stripeSect.querySelectorAll('input');
+            const paypalInput = paypalSect.querySelector('input');
+
+            // Reset buttons and requirements
+            buttons.forEach(btn => btn.classList.remove('active'));
+            stripeInputs.forEach(input => input.removeAttribute('required'));
+            paypalInput.removeAttribute('required');
+
+            // Activate selected method
+            buttons.forEach(btn => {
+                if (btn.dataset.method === method) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Toggle sections and set requirements
+            if (method === 'stripe') {
+                stripeSect.classList.remove('hidden');
+                paypalSect.classList.add('hidden');
+                stripeInputs.forEach(input => input.setAttribute('required', 'true'));
+            } else {
+                stripeSect.classList.add('hidden');
+                paypalSect.classList.remove('hidden');
+                paypalInput.setAttribute('required', 'true');
+            }
+        }
+
+        // Form validation
+        function validateForm() {
             // Get the payment form
-            const paymentForm = document.querySelector('.payment-form-content');
+            const paymentForm = document.getElementById('paymentFormContent');
+
+            // Get current payment method
+            const currentPaymentMethod = document.querySelector('.payment-method.active').dataset.method;
+
             // Get or create status label
             let statusLabel = document.querySelector('.payment-status-label');
             if (!statusLabel) {
@@ -869,7 +1276,7 @@
             statusLabel.className = 'payment-status-label';
 
             // Validate amount
-            const amountInput = paymentForm.querySelector('input[name="amount"]');
+            const amountInput = document.getElementById('amount');
             const amount = amountInput.value.trim();
             if (!amount || parseFloat(amount) <= 0) {
                 statusLabel.textContent = 'Invalid amount. Please enter a positive number.';
@@ -879,9 +1286,9 @@
 
             // Validate payment method-specific fields
             if (currentPaymentMethod === 'stripe') {
-                const cardNumber = paymentForm.querySelector('input[name="cardNumber"]').value.trim().replace(/\s/g, '');
-                const expiryDate = paymentForm.querySelector('input[name="expiryDate"]').value.trim();
-                const cvc = paymentForm.querySelector('input[name="cvc"]').value.trim();
+                const cardNumber = document.getElementById('cardNumber').value.trim().replace(/\s/g, '');
+                const expiryDate = document.getElementById('expiryDate').value.trim();
+                const cvc = document.getElementById('cvc').value.trim();
 
                 // Basic validation
                 if (!cardNumber || cardNumber.length < 13) {
@@ -913,967 +1320,477 @@
             return true;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const paymentForm = document.querySelector('.payment-form-content');
-            const paymentFormContainer = document.getElementById('paymentForm');
-            const verificationPage = document.getElementById('verificationPage');
-            const statusLabel = document.createElement('div');
-            statusLabel.className = 'payment-status-label';
-            paymentForm.appendChild(statusLabel);
+        // Setup the payment form with validation and submission
+        function setupPaymentForm() {
+            const paymentForm = document.getElementById('paymentFormContent');
+            const cardNumberInput = document.getElementById('cardNumber');
+            const expiryDateInput = document.getElementById('expiryDate');
+            const cvcInput = document.getElementById('cvc');
+            const submitButton = document.querySelector('.submit-button');
 
             // Card number formatting
-            const cardNumberInput = paymentForm.querySelector('input[name="cardNumber"]');
-            cardNumberInput.addEventListener('input', function (e) {
-                let value = this.value.replace(/\D/g, '');
-                value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-                if (value.length > 19) return;
-                this.value = value;
-            });
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', function (e) {
+                    let value = this.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+                    if (value.length > 19) return;
+                    this.value = value;
+                });
+            }
 
             // Expiry date formatting
-            const expiryDateInput = paymentForm.querySelector('input[name="expiryDate"]');
-            expiryDateInput.addEventListener('input', function (e) {
-                let value = this.value.replace(/\D/g, '');
-                if (value.length > 4) return;
+            if (expiryDateInput) {
+                expiryDateInput.addEventListener('input', function (e) {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 4) return;
 
-                if (value.length >= 2) {
-                    value = value.slice(0, 2) + '/' + value.slice(2);
-                }
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2);
+                    }
 
-                this.value = value;
-            });
+                    this.value = value;
+                });
+            }
 
             // CVC formatting
-            const cvcInput = paymentForm.querySelector('input[name="cvc"]');
-            cvcInput.addEventListener('input', function (e) {
-                this.value = this.value.replace(/\D/g, '');
-            });
-
-            // Email validation function (for PayPal)
-            function validateEmail(email) {
-                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return regex.test(email);
+            if (cvcInput) {
+                cvcInput.addEventListener('input', function (e) {
+                    this.value = this.value.replace(/\D/g, '');
+                });
             }
-
-            // Card number validation using Luhn algorithm
-            function validateCardNumber(number) {
-                if (!/^\d+$/.test(number)) return false;
-
-                let sum = 0;
-                let isEven = false;
-
-                for (let i = number.length - 1; i >= 0; i--) {
-                    let digit = parseInt(number.charAt(i), 10);
-
-                    if (isEven) {
-                        digit *= 2;
-                        if (digit > 9) {
-                            digit -= 9;
-                        }
-                    }
-
-                    sum += digit;
-                    isEven = !isEven;
-                }
-
-                return (sum % 10) === 0;
-            }
-
-            // Expiry date validation
-            function validateExpiryDate(date) {
-                const regex = /^(0[1-9]|1[0-2])\/\d{2}$/;
-                if (!regex.test(date)) return false;
-
-                const [month, year] = date.split('/');
-                const currentDate = new Date();
-                const currentYear = currentDate.getFullYear() % 100;
-                const currentMonth = currentDate.getMonth() + 1;
-
-                const expYear = parseInt(year, 10);
-                const expMonth = parseInt(month, 10);
-
-                return expYear > currentYear ||
-                    (expYear === currentYear && expMonth >= currentMonth);
-            }
-
-            // CVC validation
-            function validateCVC(cvc) {
-                return /^\d{3,4}$/.test(cvc);
-            }
-
-            // Form validation function
-
 
             // Form submission handler
-            paymentForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                // Determine current payment method
-                const currentPaymentMethod = document.querySelector('.payment-method.active').querySelector('i').classList.contains('fa-stripe') ? 'stripe' : 'paypal';
-
-                // Validate form
-                if (!validateForm(currentPaymentMethod)) {
-                    return;
-                }
-
-                // Prepare form data
-                let formData = {
-                    paymentMethod: currentPaymentMethod,
-                    amount: paymentForm.querySelector('input[name="amount"]').value
-                };
-
-                // Add method-specific details
-                if (currentPaymentMethod === 'stripe') {
-                    formData.cardNumber = paymentForm.querySelector('input[name="cardNumber"]').value.replace(/\s/g, '');
-                    formData.expiryDate = paymentForm.querySelector('input[name="expiryDate"]').value;
-                    formData.cvc = paymentForm.querySelector('input[name="cvc"]').value;
-                } else {
-                    formData.paypalEmail = document.getElementById('paypalEmail').value;
-                }
-
-                try {
-                    // Send payment data
-                    const response = await fetch('/api/payment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            credentials: 'include'
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        // Show verification page
-                        if (verificationPage && paymentFormContainer) {
-                            verificationPage.classList.remove('hidden');
-                            paymentFormContainer.classList.add('hidden');
-
-                            // Reset form
-                            paymentForm.reset();
-                            selectPaymentMethod('stripe');
-                            checkPaymentStatus(data.paymentId);
-                        }
-                    } else {
-                        const data = await response.json();
-                        statusLabel.textContent = data.error || 'Payment submission failed.';
-                        statusLabel.classList.add('error');
-                    }
-                } catch (error) {
-                    console.error('Payment error:', error);
-                    statusLabel.textContent = 'An error occurred. Please try again.';
-                    statusLabel.classList.add('error');
-                }
-            });
-        });
-
-        // Add payment status checking
-        function checkPaymentStatus(paymentId) {
-            fetch(`/api/payment/${paymentId}/status`, {
-                method: 'GET',
-                credentials: 'include'
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to check payment status');
-                    return response.json();
-                })
-                .then(data => {
-                    const statusText = document.querySelector('.status-text');
-                    const spinner = document.querySelector('.status-text + i');
-
-                    if (statusText && spinner) {
-                        if (data.status === 'approved') {
-                            statusText.textContent = 'Approved';
-                            spinner.classList.remove('fa-spinner', 'fa-spin');
-                            spinner.classList.add('fa-check');
-                            spinner.style.color = '#10b981';
-                        } else if (data.status === 'rejected') {
-                            statusText.textContent = 'Rejected';
-                            spinner.classList.remove('fa-spinner', 'fa-spin');
-                            spinner.classList.add('fa-times');
-                            spinner.style.color = '#ef4444';
-                        } else {
-                            // Still pending, check again in 30 seconds
-                            setTimeout(() => checkPaymentStatus(paymentId), 30000);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking payment status:', error);
-                });
-        }
-        // Payment method selection function
-        function selectPaymentMethod(method) {
-            const buttons = document.querySelectorAll('.payment-method');
-            const stripeSect = document.querySelector('.stripe-section');
-            const paypalSect = document.querySelector('.paypal-section');
-
-            // Get all input elements
-            const stripeInputs = stripeSect.querySelectorAll('input');
-            const paypalInput = paypalSect.querySelector('input');
-
-            // Reset buttons and requirements
-            buttons.forEach(btn => btn.classList.remove('active'));
-            stripeInputs.forEach(input => input.removeAttribute('required'));
-            paypalInput.removeAttribute('required');
-
-            // Activate selected method
-            const activeButton = Array.from(buttons).find(btn =>
-                btn.querySelector('i').classList.contains(method === 'stripe' ? 'fa-stripe' : 'fa-paypal')
-            );
-
-            if (activeButton) activeButton.classList.add('active');
-
-            // Toggle sections and set requirements
-            if (method === 'stripe') {
-                stripeSect.classList.remove('hidden');
-                paypalSect.classList.add('hidden');
-                stripeInputs.forEach(input => input.setAttribute('required', 'true'));
-            } else {
-                stripeSect.classList.add('hidden');
-                paypalSect.classList.remove('hidden');
-                paypalInput.setAttribute('required', 'true');
-            }
-        }
-
-        function togglePaymentForm() {
-            showSection('paymentForm');
-            document.querySelectorAll('.nav-menu li').forEach(item => {
-                item.classList.remove('active');
-            });
-            const addFundsNavItem = document.querySelector('a[href="#add-funds"]').parentElement;
-            addFundsNavItem.classList.add('active');
-
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
-        }
-
-        function initializeDatePicker() {
-            const dateFilterBtn = document.querySelector('.date-filter-btn');
-            const popup = document.querySelector('.date-picker-popup');
-            const cancelBtn = document.querySelector('.cancel-btn');
-            const applyBtn = document.querySelector('.apply-btn');
-            const startDate = document.getElementById('startDate');
-            const startTime = document.getElementById('startTime');
-            const endDate = document.getElementById('endDate');
-            const endTime = document.getElementById('endTime');
-
-            if (!dateFilterBtn) return;
-
-            function formatDate(date, time) {
-                const d = new Date(`${date}T${time}`);
-                return d.toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: false
-                });
-            }
-
-            function updateDateRangeText() {
-                const formattedText = `${formatDate(startDate.value, startTime.value)} - ${formatDate(endDate.value, endTime.value)}`;
-                document.getElementById('dateRangeText').textContent = formattedText;
-            }
-
-            dateFilterBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                popup.classList.toggle('hidden');
-            });
-
-            cancelBtn.addEventListener('click', () => {
-                popup.classList.add('hidden');
-            });
-
-            applyBtn.addEventListener('click', () => {
-                updateDateRangeText();
-                popup.classList.add('hidden');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!popup.contains(e.target) && !dateFilterBtn.contains(e.target)) {
-                    popup.classList.add('hidden');
-                }
-            });
-
-            popup.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
-
-        function showVerificationPage() {
-            document.getElementById('verificationPage').classList.remove('hidden');
-            document.getElementById('paymentForm').classList.add('hidden');
-        }
-
-        function hideVerificationPage() {
-            document.getElementById('verificationPage').classList.add('hidden');
-            document.getElementById('emptyState').classList.remove('hidden');
-        }
-
-        function showCampaignForm(mode, campaignId) {
-            showSection('createCampaignSection');
-
-            const title = document.getElementById('campaignFormTitle');
-            const idElement = document.getElementById('campaignId');
-
-            if (mode === 'edit' && campaignId) {
-                title.textContent = 'Edit Campaign';
-                idElement.textContent = campaignId;
-                loadCampaignData(campaignId);
-            } else {
-                title.textContent = 'Create Campaign';
-                idElement.textContent = '';
-            }
-        }
-
-        function loadCampaignData(campaignId) {
-            const campaignData = {
-                id: campaignId,
-                optimization: 'manual',
-            };
-            selectOptimization(campaignData.optimization, true);
-        }
-
-        function selectOptimization(type, skipDisabled = false) {
-            const cards = document.querySelectorAll('.optimization-card');
-            cards.forEach(card => {
-                if (!card.classList.contains('disabled') || skipDisabled) {
-                    card.classList.remove('active');
-                    if (card.querySelector('.card-title').textContent.toLowerCase().includes(type)) {
-                        card.classList.add('active');
-                    }
-                }
-            });
-        }
-
-        // Initialize campaign steps
-        document.addEventListener('DOMContentLoaded', function () {
-            const stepItems = document.querySelectorAll('.step-item');
-            stepItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-
-                    // Update active states
-                    stepItems.forEach(step => step.classList.remove('active'));
-                    item.classList.add('active');
-
-                    // Handle scrolling to sections
-                    const stepNumber = item.querySelector('.step-number').textContent;
-                    let targetSection;
-
-                    switch (stepNumber) {
-                        case '1':
-                            targetSection = document.querySelector('.optimization-options');
-                            break;
-                        case '2':
-                            targetSection = document.querySelector('.creative-section');
-                            break;
-                        // Add cases for other steps
-                    }
-
-                    if (targetSection) {
-                        targetSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-            });
-
-            // Handle priority button selection
-            const priorityBtns = document.querySelectorAll('.priority-btn');
-            priorityBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    priorityBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                });
-            });
-
-            // Handle adding new creative rows
-            const addCreativeBtn = document.querySelector('.add-creative-btn');
-            const creativeRows = document.querySelector('.creative-rows');
-
-            if (addCreativeBtn && creativeRows) {
-                addCreativeBtn.addEventListener('click', () => {
-                    const newRow = creativeRows.querySelector('.creative-row').cloneNode(true);
-                    // Clear input values
-                    newRow.querySelectorAll('input').forEach(input => input.value = '');
-                    creativeRows.appendChild(newRow);
-                });
-            }
-        });
-        // Function to check payment status and show appropriate screen
-        async function checkAndShowPaymentStatus() {
-            try {
-                const response = await fetch('/api/payment/status', {
-                    method: 'GET',
-                    credentials: 'include', // Important for sending cookies
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.status === 401) {
-                    console.log("Authentication required. Redirecting to login...");
-                    // Optional: Redirect to login page if unauthorized
-                    // window.location.href = '/frontend/login.html';
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch payment status');
-                }
-
-                const data = await response.json();
-
-                // Update status based on payment status
-                handlePaymentStatus(data);
-            } catch (error) {
-                console.error('Error checking payment status:', error);
-            }
-        }
-        function handlePaymentStatus(data) {
-            // Select the verification page and payment form elements
-            const verificationPage = document.getElementById('verificationPage');
-            const paymentForm = document.getElementById('paymentForm');
             if (paymentForm) {
                 paymentForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
-                    console.log('Payment form submitted');
 
-                    // Get current payment method
-                    const paymentMethod = document.querySelector('.payment-method.active').dataset.method;
+                    // Validate form
+                    if (!validateForm()) {
+                        return;
+                    }
 
-                    // Prepare form data based on payment method
+                    // Show loading state
+                    submitButton.classList.add('loading');
+                    submitButton.disabled = true;
+
+                    // Prepare form data
+                    const currentPaymentMethod = document.querySelector('.payment-method.active').dataset.method;
                     let formData = {
-                        paymentMethod: paymentMethod,
+                        paymentMethod: currentPaymentMethod,
                         amount: document.getElementById('amount').value
                     };
 
-                    if (paymentMethod === 'stripe') {
-                        formData.cardNumber = document.getElementById('cardNumber').value;
+                    // Add method-specific details
+                    if (currentPaymentMethod === 'stripe') {
+                        formData.cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
                         formData.expiryDate = document.getElementById('expiryDate').value;
                         formData.cvc = document.getElementById('cvc').value;
                     } else {
                         formData.paypalEmail = document.getElementById('paypalEmail').value;
                     }
 
-                    console.log('Submitting payment data:', formData);
-
                     try {
+                        // Send payment data
                         const response = await fetch('/api/payment', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify(formData),
-                            credentials: 'include'  // This is crucial - it ensures cookies are sent
+                            credentials: 'include',
+                            body: JSON.stringify(formData)
                         });
 
-                        console.log('Response status:', response.status);
-
                         const data = await response.json();
-                        console.log('Response data:', data);
 
                         if (response.ok) {
-                            // Hide payment form
-                            document.getElementById('paymentForm').classList.add('hidden');
-
-                            // Show success message
-                            const statusLabel = document.querySelector('.payment-status-label');
-                            statusLabel.textContent = 'Payment submitted successfully! We will process your request shortly.';
-                            statusLabel.classList.add('success');
-                            statusLabel.style.display = 'block';
-
-                            // You might want to poll for status updates
-                            checkPaymentStatus(data.paymentId);
-                        } else {
-                            // Show error message
-                            const statusLabel = document.querySelector('.payment-status-label');
-                            statusLabel.textContent = data.error || 'Failed to submit payment';
-                            statusLabel.classList.add('error');
-                            statusLabel.style.display = 'block';
-                        }
-                    } catch (error) {
-                        console.error('Payment submission error:', error);
-
-                        // Show error message
-                        const statusLabel = document.querySelector('.payment-status-label');
-                        statusLabel.textContent = 'An error occurred while submitting your payment';
-                        statusLabel.classList.add('error');
-                        statusLabel.style.display = 'block';
-                    }
-                });
-            }
-            const emptyState = document.getElementById('emptyState');
-
-            // Update status based on payment status
-            if (data.status === 'pending') {
-                // Show verification page if payment is pending
-                if (verificationPage && paymentForm) {
-                    verificationPage.classList.remove('hidden');
-                    paymentForm.classList.add('hidden');
-                    emptyState.classList.add('hidden');
-                }
-            } else if (data.status === 'approved') {
-                // Show a payment approved screen or update balance
-                const approvedScreen = createPaymentApprovedScreen(data.amount);
-
-                // Replace or append the approved screen
-                const contentArea = document.querySelector('.content-area');
-                if (contentArea) {
-                    // Hide existing content
-                    document.querySelectorAll('.content-area > div').forEach(section => {
-                        section.classList.add('hidden');
-                    });
-
-                    // Append or replace with approved screen
-                    contentArea.appendChild(approvedScreen);
-                }
-            } else if (data.status === 'rejected') {
-                // Show payment rejected screen
-                const rejectedScreen = createPaymentRejectedScreen();
-
-                // Replace or append the rejected screen
-                const contentArea = document.querySelector('.content-area');
-                if (contentArea) {
-                    // Hide existing content
-                    document.querySelectorAll('.content-area > div').forEach(section => {
-                        section.classList.add('hidden');
-                    });
-
-                    // Append or replace with rejected screen
-                    contentArea.appendChild(rejectedScreen);
-                }
-            }
-        }
-        function isGoogleAuthenticated() {
-            return localStorage.getItem('googleAuth') === 'true';
-        }
-
-        function setGoogleAuthenticated() {
-            localStorage.setItem('googleAuth', 'true');
-        }
-        // Replace your existing submitPayment function with this one
-        function submitPayment(e) {
-            e.preventDefault();
-
-            // Get the current payment method
-            const currentPaymentMethod = document.querySelector('.payment-method.active').querySelector('i').classList.contains('fa-stripe') ? 'stripe' : 'paypal';
-
-            // Get form elements
-            const paymentForm = document.querySelector('.payment-form-content');
-
-            // Find or create status label
-            let statusLabel = document.querySelector('.payment-status-label');
-            if (!statusLabel) {
-                statusLabel = document.createElement('div');
-                statusLabel.className = 'payment-status-label';
-                paymentForm.appendChild(statusLabel);
-            }
-
-            statusLabel.className = 'payment-status-label'; // Reset classes
-            statusLabel.style.display = 'none';
-
-            // Validate the form
-            if (!validateForm(currentPaymentMethod)) {
-                return;
-            }
-
-            // Prepare form data
-            const formData = {
-                paymentMethod: currentPaymentMethod,
-                amount: paymentForm.querySelector('input[name="amount"]').value
-            };
-
-            // Add method-specific details
-            if (currentPaymentMethod === 'stripe') {
-                formData.cardNumber = paymentForm.querySelector('input[name="cardNumber"]').value.replace(/\s/g, '');
-                formData.expiryDate = paymentForm.querySelector('input[name="expiryDate"]').value;
-                formData.cvc = paymentForm.querySelector('input[name="cvc"]').value;
-            } else {
-                formData.paypalEmail = document.getElementById('paypalEmail').value;
-            }
-
-            // Add Google authentication flag if applicable
-            if (isGoogleAuthenticated()) {
-                formData.googleAuth = true;
-                formData.userEmail = localStorage.getItem('userEmail'); // Make sure to store this during login
-            }
-
-            console.log('Submitting payment data:', JSON.stringify(formData));
-
-            // Submit the payment
-            fetch('/api/payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Add a custom header for Google Auth
-                    'X-Google-Auth': isGoogleAuthenticated() ? 'true' : 'false'
-                },
-                body: JSON.stringify(formData),
-                credentials: 'include' // Still include credentials for regular auth
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        if (response.status === 401) {
-                            // Handle authentication error differently for Google users
-                            if (isGoogleAuthenticated()) {
-                                statusLabel.textContent = 'Google authentication session expired. Refreshing...';
-                                statusLabel.classList.add('error');
-                                statusLabel.style.display = 'block';
-
-                                // Attempt to refresh the session by re-initiating Google auth
-                                refreshGoogleAuth();
-                                return;
-                            } else {
-                                statusLabel.textContent = 'Authentication required. Please log in again.';
-                                statusLabel.classList.add('error');
-                                statusLabel.style.display = 'block';
-
-                                setTimeout(() => {
-                                    window.location.href = '/frontend/login.html';
-                                }, 2000);
-                            }
-                            throw new Error('Authentication required');
-                        }
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error) {
-                        // Handle error from server
-                        statusLabel.textContent = data.error;
-                        statusLabel.classList.add('error');
-                        statusLabel.style.display = 'block';
-                        throw new Error(data.error);
-                    }
-
-                    // Success! Show verification page
-                    const verificationPage = document.getElementById('verificationPage');
-                    const paymentFormContainer = document.getElementById('paymentForm');
-
-                    if (verificationPage && paymentFormContainer) {
-                        verificationPage.classList.remove('hidden');
-                        paymentFormContainer.classList.add('hidden');
-
-                        // Reset form
-                        paymentForm.reset();
-                        selectPaymentMethod('stripe');
-
-                        // Check payment status
-                        if (data.paymentId) {
-                            checkPaymentStatus(data.paymentId);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Payment error:', error);
-
-                    // Only show error if not already shown
-                    if (statusLabel.style.display !== 'block') {
-                        statusLabel.textContent = 'An error occurred. Please try again.';
-                        statusLabel.classList.add('error');
-                        statusLabel.style.display = 'block';
-                    }
-                });
-        }
-        function refreshGoogleAuth() {
-            // Store current URL to return here after auth
-            localStorage.setItem('redirectAfterLogin', window.location.href);
-
-            // Redirect to a simplified Google auth flow
-            window.location.href = '/frontend/login.html?refreshAuth=true';
-        }
-        function checkGoogleAuthRefresh() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('googleAuth') && urlParams.get('googleAuth') === 'success') {
-                // Clean up URL
-                history.replaceState({}, document.title, window.location.pathname);
-
-                // Set Google authentication flag
-                setGoogleAuthenticated();
-
-                // Show success message
-                const statusLabel = document.createElement('div');
-                statusLabel.className = 'payment-status-label success';
-                statusLabel.textContent = 'Google authentication refreshed successfully.';
-                statusLabel.style.display = 'block';
-
-                document.querySelector('.content-area').appendChild(statusLabel);
-
-                // Hide after 3 seconds
-                setTimeout(() => {
-                    statusLabel.style.display = 'none';
-                }, 3000);
-            }
-        }
-        function checkAuthCookie() {
-            return document.cookie.includes('token=');
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            const paymentForm = document.querySelector('.payment-form-content');
-
-            if (paymentForm) {
-                // Remove any existing event listeners (just in case)
-                paymentForm.removeEventListener('submit', submitPayment);
-
-                // Add the correct event listener
-                paymentForm.addEventListener('submit', submitPayment);
-            }
-
-            // Check if user is coming from Google OAuth flow
-            if (window.location.href.includes('code=')) {
-                console.log('Detected OAuth flow completion');
-            }
-        });
-
-        // Create payment approved screen
-        function createPaymentApprovedScreen(amount) {
-            const approvedScreen = document.createElement('div');
-            approvedScreen.className = 'verification-container payment-approved-container';
-            approvedScreen.innerHTML = `
-        <div class="verification-content">
-            <div class="payment-approved-icon">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <h1>Payment Approved!</h1>
-            <p class="verification-text">Your payment of $${amount} has been successfully approved.</p>
-            <button class="back-button" onclick="redirectToDashboard()">
-                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-            </button>
-        </div>
-    `;
-
-            // Add styles to the screen
-            const styles = `
-        <style>
-            .payment-approved-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                background-color: #f9fafb;
-            }
-            
-            .payment-approved-icon {
-                font-size: 5rem;
-                color: #10b981;
-                margin-bottom: 1rem;
-            }
-            
-            .payment-approved-container h1 {
-                color: #111827;
-                margin-bottom: 1rem;
-            }
-            
-            .payment-approved-container .verification-text {
-                color: #6b7280;
-                margin-bottom: 2rem;
-            }
-            
-            .back-button {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.5rem 1rem;
-                background: #f3f4f6;
-                border: none;
-                border-radius: 0.375rem;
-                color: #374151;
-                font-size: 0.875rem;
-                cursor: pointer;
-                transition: background-color 0.2s;
-            }
-            
-            .back-button:hover {
-                background: #e5e7eb;
-            }
-        </style>
-    `;
-
-            approvedScreen.innerHTML += styles;
-            return approvedScreen;
-        }
-
-        // Create payment rejected screen
-        function createPaymentRejectedScreen() {
-            const rejectedScreen = document.createElement('div');
-            rejectedScreen.className = 'verification-container payment-rejected-container';
-            rejectedScreen.innerHTML = `
-        <div class="verification-content">
-            <div class="payment-rejected-icon">
-                <i class="fa-solid fa-times-circle"></i>
-            </div>
-            <h1>Payment Rejected</h1>
-            <p class="verification-text">Unfortunately, your payment request has been rejected. Please contact support for more information.</p>
-            <div class="questions-box">
-                <h2>Need Help?</h2>
-                <ul>
-                    <li>Contact your personal manager directly</li>
-                    <li>Use live-chat in the right corner of the screen</li>
-                    <li>Email us at <a href="mailto:support@smartrichads.com">support@smartrichads.com</a></li>
-                </ul>
-            </div>
-            <button class="back-button" onclick="redirectToDashboard()">
-                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-            </button>
-        </div>
-    `;
-
-            // Add styles to the screen
-            const styles = `
-        <style>
-            .payment-rejected-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                background-color: #f9fafb;
-            }
-            
-            .payment-rejected-icon {
-                font-size: 5rem;
-                color: #ef4444;
-                margin-bottom: 1rem;
-            }
-            
-            .payment-rejected-container h1 {
-                color: #111827;
-                margin-bottom: 1rem;
-            }
-            
-            .payment-rejected-container .verification-text {
-                color: #6b7280;
-                margin-bottom: 2rem;
-            }
-            
-            .back-button {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.5rem 1rem;
-                background: #f3f4f6;
-                border: none;
-                border-radius: 0.375rem;
-                color: #374151;
-                font-size: 0.875rem;
-                cursor: pointer;
-                transition: background-color 0.2s;
-            }
-            
-            .back-button:hover {
-                background: #e5e7eb;
-            }
-        </style>
-    `;
-
-            rejectedScreen.innerHTML += styles;
-            return rejectedScreen;
-        }
-
-        // Call this function when the page loads
-        document.addEventListener('DOMContentLoaded', function () {
-            const paymentForm = document.querySelector('.payment-form-content');
-
-            if (paymentForm) {
-                paymentForm.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-
-                    // Determine current payment method
-                    const currentPaymentMethod = document.querySelector('.payment-method.active').querySelector('i').classList.contains('fa-stripe') ? 'stripe' : 'paypal';
-
-                    // Validate form
-                    if (!validateForm(currentPaymentMethod)) {
-                        return;
-                    }
-
-                    // Prepare form data
-                    let formData = {
-                        paymentMethod: currentPaymentMethod,
-                        amount: paymentForm.querySelector('input[name="amount"]').value
-                    };
-
-                    // Add method-specific details
-                    if (currentPaymentMethod === 'stripe') {
-                        formData.cardNumber = paymentForm.querySelector('input[name="cardNumber"]').value.replace(/\s/g, '');
-                        formData.expiryDate = paymentForm.querySelector('input[name="expiryDate"]').value;
-                        formData.cvc = paymentForm.querySelector('input[name="cvc"]').value;
-                    } else {
-                        formData.paypalEmail = document.getElementById('paypalEmail').value;
-                    }
-
-                    // Submit payment
-                    const result = await submitPaymentForm(formData);
-
-                    if (result.success) {
-                        // Show verification page
-                        const verificationPage = document.getElementById('verificationPage');
-                        const paymentFormContainer = document.getElementById('paymentForm');
-
-                        if (verificationPage && paymentFormContainer) {
-                            verificationPage.classList.remove('hidden');
-                            paymentFormContainer.classList.add('hidden');
+                            // Store payment ID for status checking
+                            lastPaymentId = data.paymentId;
 
                             // Reset form
                             paymentForm.reset();
                             selectPaymentMethod('stripe');
 
-                            // Check payment status
-                            checkPaymentStatus(result.data.paymentId);
-                        }
-                    } else {
-                        // Show error
-                        const statusLabel = document.querySelector('.payment-status-label') ||
-                            document.createElement('div');
-                        statusLabel.className = 'payment-status-label error';
-                        statusLabel.textContent = result.error;
+                            // Store payment ID and status
+                            currentPaymentStatus = 'pending';
+                            localStorage.setItem('pendingPaymentId', data.paymentId);
+                            localStorage.setItem('pendingPaymentAmount', formData.amount);
 
-                        if (!document.querySelector('.payment-status-label')) {
-                            paymentForm.appendChild(statusLabel);
+                            // Start checking payment status
+                            startPaymentStatusCheck(data.paymentId);
+
+                            // Show verification page (pending screen)
+                            document.getElementById('verificationPage').classList.remove('hidden');
+                            document.getElementById('paymentForm').classList.add('hidden');
+                        } else {
+                            // Show error
+                            const statusLabel = document.querySelector('.payment-status-label');
+                            statusLabel.textContent = data.error || 'Payment submission failed.';
+                            statusLabel.classList.add('error');
                         }
+                    } catch (error) {
+                        console.error('Payment error:', error);
+                        const statusLabel = document.querySelector('.payment-status-label');
+                        statusLabel.textContent = 'An error occurred. Please try again.';
+                        statusLabel.classList.add('error');
+                    } finally {
+                        // Remove loading state
+                        submitButton.classList.remove('loading');
+                        submitButton.disabled = false;
                     }
                 });
             }
-        });
-        function redirectToDashboard() {
-            // Clear any stored payment status
-            localStorage.removeItem('paymentStatus');
+        }
 
-            // Reset the entire page content
-            const dashboardContainer = document.querySelector('.dashboard');
-            if (dashboardContainer) {
-                // Reset to default view
-                document.querySelectorAll('.content-area > div').forEach(section => {
-                    section.classList.add('hidden');
+        // Format currency
+        function formatCurrency(amount) {
+            return parseFloat(amount).toFixed(2);
+        }
+
+        // Show payment notification
+        function showPaymentNotification(status, amount) {
+    // Only show notifications for approved or rejected status, not pending
+    if (status === 'pending') return;
+    
+    const notification = document.getElementById('paymentNotification');
+    const message = document.getElementById('notificationMessage');
+    const actions = document.getElementById('notificationActions');
+    const contentArea = document.getElementById('contentArea');
+    
+    // Remove previous status classes
+    notification.classList.remove('pending', 'approved', 'rejected');
+    
+    // Add new status class
+    notification.classList.add(status);
+    
+    // Clear previous actions
+    actions.innerHTML = '';
+    
+    // Set notification message based on status
+    switch(status) {
+        case 'approved':
+            message.innerHTML = `Your payment of <strong>${formatCurrency(amount)}</strong> has been approved! Your funds are now available.`;
+            
+            // Add view balance button if needed
+            const balanceBtn = document.createElement('button');
+           
+            actions.appendChild(balanceBtn);
+            break;
+            
+        case 'rejected':
+            message.innerHTML = `Your payment of <strong>${formatCurrency(amount)}</strong> was rejected. Please contact support for assistance.`;
+            
+            // Add try again button
+            const tryAgainBtn = document.createElement('button');
+            tryAgainBtn.className = 'notification-action-btn';
+            tryAgainBtn.textContent = 'Try Again';
+            tryAgainBtn.onclick = function() {
+                togglePaymentForm();
+            };
+            actions.appendChild(tryAgainBtn);
+            
+            // Add contact support button
+            const supportBtn = document.createElement('button');
+            supportBtn.className = 'notification-action-btn';
+            supportBtn.textContent = 'Contact Support';
+            supportBtn.onclick = function() {
+                // Would open support contact form or chat
+                alert('Support contact functionality would open here');
+            };
+            actions.appendChild(supportBtn);
+            break;
+    }
+    
+    // Show notification
+    notification.classList.remove('hidden');
+    
+    // Adjust content area padding
+    contentArea.classList.add('with-notification');
+    
+    // Store current status in localStorage for persistence
+    localStorage.setItem('notificationStatus', status);
+    localStorage.setItem('notificationAmount', amount);
+    
+    // Auto-hide approved notifications after 24 hours
+    if (status === 'approved') {
+        setTimeout(() => {
+            closeNotification();
+        }, 24 * 60 * 60 * 1000); // 24 hours
+    }
+}
+
+        // Close notification
+        function closeNotification() {
+            const notification = document.getElementById('paymentNotification');
+            const contentArea = document.getElementById('contentArea');
+
+            notification.classList.add('hidden');
+            contentArea.classList.remove('with-notification');
+
+            // Clear stored notification status
+            localStorage.removeItem('notificationStatus');
+            localStorage.removeItem('notificationAmount');
+
+            // Don't stop checking payment status here since closing the notification
+            // shouldn't affect the background status checks for pending payments
+        }
+
+        // Update balance display
+
+
+        // Check payment status
+        async function checkPaymentStatus() {
+
+            // First check if we have a pending payment
+            const pendingPaymentId = localStorage.getItem('pendingPaymentId');
+
+            if (pendingPaymentId) {
+                // If we have a pending payment, start checking for updates
+                startPaymentStatusCheck(pendingPaymentId);
+            }
+
+            // Check if we have a stored notification
+            const storedStatus = localStorage.getItem('notificationStatus');
+            const storedAmount = localStorage.getItem('notificationAmount');
+
+            if (storedStatus && storedAmount) {
+                // Show notification for stored status (will only be approved or rejected)
+                showPaymentNotification(storedStatus, storedAmount);
+            }
+
+            // Check server for latest payment status
+            if (storedStatus === 'pending') {
+                // Check current payment status from server
+                checkPaymentStatusFromServer();
+            }
+            else {
+                // If no stored status, check from server
+                checkPaymentStatusFromServer();
+            }
+
+        }
+
+
+        // Check payment status from server
+        async function checkPaymentStatusFromServer() {
+            try {
+                // Get most recent payment status
+                const response = await fetch('/api/payment/status', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
 
-                // Show empty state
-                const emptyState = document.getElementById('emptyState');
-                if (emptyState) {
-                    emptyState.classList.remove('hidden');
+                if (response.status === 401) {
+                    // Redirect to login if unauthorized
+                    console.log("Authentication required. Redirecting to login...");
+                    return;
                 }
 
-                // Reset top nav title
-                const topNavTitle = document.querySelector('.top-nav h1');
-                if (topNavTitle) {
-                    topNavTitle.textContent = 'Offers';
+                if (!response.ok) {
+                    // If no payment found, that's fine - just don't show notification
+                    if (response.status === 404) {
+                        return;
+                    }
+                    throw new Error('Failed to fetch payment status');
                 }
 
-                // Reset active sidebar item
-                document.querySelectorAll('.nav-menu li').forEach(item => {
-                    item.classList.remove('active');
-                });
-                const offersNavItem = document.querySelector('a[href="#offers"]').parentElement;
-                if (offersNavItem) {
-                    offersNavItem.classList.add('active');
+                // Process payment data
+                const data = await response.json();
+
+                // Update status
+                currentPaymentStatus = data.status;
+
+                // Only show notification for approved or rejected status
+                if (data.status && data.amount) {
+                    // Handle based on status
+                    if (data.status === 'pending') {
+                        // If payment is pending, show verification page
+                        const verificationPage = document.getElementById('verificationPage');
+                        if (verificationPage && !verificationPage.classList.contains('hidden')) {
+                            // Already showing verification page, just start checking updates
+                            startPaymentStatusCheck();
+                        } else if (localStorage.getItem('pendingPaymentId')) {
+                            // We have a pending payment ID stored, show verification page
+                            document.getElementById('verificationPage').classList.remove('hidden');
+                            document.getElementById('emptyState').classList.add('hidden');
+                            document.getElementById('paymentForm').classList.add('hidden');
+                            startPaymentStatusCheck();
+                        }
+                    } else if (data.status === 'approved' || data.status === 'rejected') {
+                        // For approved or rejected status, show notification
+                        showPaymentNotification(data.status, data.amount);
+
+                        // Hide verification page if it's visible
+                        const verificationPage = document.getElementById('verificationPage');
+                        if (verificationPage && !verificationPage.classList.contains('hidden')) {
+                            verificationPage.classList.add('hidden');
+                            document.getElementById('emptyState').classList.remove('hidden');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking payment status from server:', error);
+            }
+        }
+
+        // Start checking payment status periodically
+        function startPaymentStatusCheck(paymentId = null) {
+            // Clear any existing interval
+            if (paymentCheckInterval) {
+                clearInterval(paymentCheckInterval);
+            }
+
+            // Store payment ID if provided
+            if (paymentId) {
+                lastPaymentId = paymentId;
+            } else if (localStorage.getItem('pendingPaymentId')) {
+                lastPaymentId = localStorage.getItem('pendingPaymentId');
+            }
+
+            // Start interval to check status
+            paymentCheckInterval = setInterval(async function () {
+                try {
+                    // If we have a specific payment ID, check that
+                    if (lastPaymentId) {
+                        const response = await fetch(`/api/payment/${lastPaymentId}/status`, {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to check payment status');
+                        }
+
+                        const data = await response.json();
+
+                        // If status has changed from pending
+                        if (data.status !== 'pending' && data.status !== currentPaymentStatus) {
+                            // Update current status
+                            currentPaymentStatus = data.status;
+
+                            // Get the amount from localStorage
+                            const amount = localStorage.getItem('pendingPaymentAmount');
+
+                            // Hide verification page
+                            const verificationPage = document.getElementById('verificationPage');
+                            if (verificationPage && !verificationPage.classList.contains('hidden')) {
+                                verificationPage.classList.add('hidden');
+                                document.getElementById('emptyState').classList.remove('hidden');
+                            }
+
+                            // Show notification with new status
+                            showPaymentNotification(data.status, amount);
+
+                            // Clean up localStorage
+                            localStorage.removeItem('pendingPaymentId');
+                            localStorage.removeItem('pendingPaymentAmount');
+
+                            // Stop checking status
+                            clearInterval(paymentCheckInterval);
+                            paymentCheckInterval = null;
+                        } else {
+                            // Update status text on verification page
+                            updateVerificationPageStatus(data.status);
+                        }
+                    } else {
+                        // If no specific ID, check general status
+                        checkPaymentStatusFromServer();
+                    }
+                } catch (error) {
+                    console.error('Error in payment status check interval:', error);
+                }
+            }, 10000); // Check every 10 seconds
+        }
+
+        // Update verification page status text
+        function updateVerificationPageStatus(status) {
+            const statusText = document.querySelector('.status-text');
+            const spinner = document.querySelector('.status-text + i');
+
+            if (statusText && spinner) {
+                if (status === 'pending') {
+                    statusText.textContent = 'Waiting verification';
+                    spinner.className = 'fa-solid fa-spinner fa-spin';
+                    spinner.style.color = '';
+                } else if (status === 'approved') {
+                    statusText.textContent = 'Approved';
+                    spinner.className = 'fa-solid fa-check';
+                    spinner.style.color = '#10b981';
+                } else if (status === 'rejected') {
+                    statusText.textContent = 'Rejected';
+                    spinner.className = 'fa-solid fa-times';
+                    spinner.style.color = '#ef4444';
                 }
             }
         }
+
+        // Load user balance from localStorage if available
+        function loadUserBalance() {
+            const balanceElement = document.querySelector('.balance-amount');
+            const storedBalance = localStorage.getItem('userBalance');
+
+            if (balanceElement && storedBalance) {
+                balanceElement.textContent = `$ ${formatCurrency(storedBalance)}`;
+            }
+        }
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            // Load user balance
+            loadUserBalance();
+
+            // Format card input fields
+            const cardNumberInput = document.getElementById('cardNumber');
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', function () {
+                    let value = this.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+                    if (value.length > 19) return;
+                    this.value = value;
+                });
+            }
+
+            const expiryDateInput = document.getElementById('expiryDate');
+            if (expiryDateInput) {
+                expiryDateInput.addEventListener('input', function () {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 4) return;
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2);
+                    }
+                    this.value = value;
+                });
+            }
+
+            const cvcInput = document.getElementById('cvc');
+            if (cvcInput) {
+                cvcInput.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '');
+                });
+            }
+
+            // Check if we need to show verification page based on pending payment
+            if (localStorage.getItem('pendingPaymentId')) {
+                const verificationPage = document.getElementById('verificationPage');
+                if (verificationPage) {
+                    verificationPage.classList.remove('hidden');
+                    document.getElementById('emptyState').classList.add('hidden');
+                }
+            }
+        }
+
+        // Logout function
         function logout() {
             // Clear localStorage
             localStorage.removeItem('userType');
             localStorage.removeItem('userName');
+            localStorage.removeItem('pendingPaymentId');
+            localStorage.removeItem('pendingPaymentAmount');
+            localStorage.removeItem('notificationStatus');
+            localStorage.removeItem('notificationAmount');
+            localStorage.removeItem('userBalance');
 
             // Call the logout API
             fetch('/api/logout', {
@@ -1888,187 +1805,13 @@
                 window.location.href = '/frontend/login.html';
             });
         }
-        function initializeDashboard() {
-            // Check Google auth status
-            checkGoogleAuthRefresh();
 
-            // Initialize date picker and other components
-            initializeDatePicker();
-
-            // Set up payment form submission with Google auth support
-            const paymentForm = document.querySelector('.payment-form-content');
-            if (paymentForm) {
-                // Remove any existing event listeners
-                const clonedForm = paymentForm.cloneNode(true);
-                paymentForm.parentNode.replaceChild(clonedForm, paymentForm);
-
-                // Add the event listener with Google auth support
-                clonedForm.addEventListener('submit', submitPayment);
-            }
-
-            // Update UI based on auth method
-            if (isGoogleAuthenticated()) {
-                // Optional: Add visual indicator that user is Google-authenticated
-                const topNav = document.querySelector('.top-nav');
-                if (topNav) {
-                    const googleBadge = document.createElement('div');
-                    googleBadge.className = 'google-badge';
-                    googleBadge.innerHTML = '<i class="fa-brands fa-google"></i>';
-                    googleBadge.title = 'Google Authenticated';
-                    googleBadge.style.margin = '0 10px';
-                    googleBadge.style.color = '#4285F4';
-
-                    const headerActions = topNav.querySelector('.header-actions');
-                    if (headerActions) {
-                        headerActions.prepend(googleBadge);
-                    }
-                }
-            }
+        // Function to hide verification page and go back to dashboard
+        function hideVerificationPage() {
+            document.getElementById('verificationPage').classList.add('hidden');
+            document.getElementById('emptyState').classList.remove('hidden');
         }
 
-
-
-        // Call initialization function when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
-        // Enhanced submit button loader functionality
-function setupSubmitButtonLoader() {
-    const paymentForm = document.querySelector('.payment-form-content');
-    const submitButton = paymentForm.querySelector('.submit-button');
-
-    // Add loader styles
-    const loaderStyles = `
-    <style>
-        .submit-button {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        .submit-button .button-text {
-            transition: opacity 0.2s ease;
-        }
-        .submit-button .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-        }
-        .submit-button.loading .button-text {
-            opacity: 0;
-        }
-        .submit-button.loading .loader {
-            display: block;
-        }
-        .loader-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>`;
-
-    // Wrap button text and add loader
-    submitButton.innerHTML = `
-        ${loaderStyles}
-        <span class="button-text">Submit for Approval</span>
-        <div class="loader">
-            <div class="loader-spinner"></div>
-        </div>
-    `;
-
-    // Modify form submission to handle loading state
-    paymentForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Show loading state
-        submitButton.classList.add('loading');
-        submitButton.disabled = true;
-
-        try {
-            // Your existing payment submission logic here
-            const currentPaymentMethod = document.querySelector('.payment-method.active').querySelector('i').classList.contains('fa-stripe') ? 'stripe' : 'paypal';
-
-            // Validate form
-            if (!validateForm(currentPaymentMethod)) {
-                throw new Error('Validation failed');
-            }
-
-            // Prepare form data
-            let formData = {
-                paymentMethod: currentPaymentMethod,
-                amount: this.querySelector('input[name="amount"]').value
-            };
-
-            // Add method-specific details
-            if (currentPaymentMethod === 'stripe') {
-                formData.cardNumber = this.querySelector('input[name="cardNumber"]').value.replace(/\s/g, '');
-                formData.expiryDate = this.querySelector('input[name="expiryDate"]').value;
-                formData.cvc = this.querySelector('input[name="cvc"]').value;
-            } else {
-                formData.paypalEmail = document.getElementById('paypalEmail').value;
-            }
-
-            // Submit payment
-            const response = await fetch('/api/payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    credentials: 'include'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Payment submission failed');
-            }
-
-            const data = await response.json();
-
-            // Show verification page
-            const verificationPage = document.getElementById('verificationPage');
-            const paymentFormContainer = document.getElementById('paymentForm');
-
-            if (verificationPage && paymentFormContainer) {
-                verificationPage.classList.remove('hidden');
-                paymentFormContainer.classList.add('hidden');
-
-                // Reset form
-                this.reset();
-                selectPaymentMethod('stripe');
-
-                // Check payment status
-                if (data.paymentId) {
-                    checkPaymentStatus(data.paymentId);
-                }
-            }
-        } catch (error) {
-            console.error('Payment error:', error);
-
-            // Show error message
-            const statusLabel = document.querySelector('.payment-status-label') || 
-                document.createElement('div');
-            statusLabel.className = 'payment-status-label error';
-            statusLabel.textContent = error.message || 'An error occurred. Please try again.';
-            
-            if (!document.querySelector('.payment-status-label')) {
-                this.appendChild(statusLabel);
-            }
-        } finally {
-            // Always remove loading state
-            submitButton.classList.remove('loading');
-            submitButton.disabled = false;
-        }
-    });
-}
-
-// Call this function when the page loads
-document.addEventListener('DOMContentLoaded', setupSubmitButtonLoader);
     </script>
 
 </body>
