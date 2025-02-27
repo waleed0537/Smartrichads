@@ -1565,58 +1565,46 @@
     // Loader elements
     const loader = document.getElementById('page-loader');
     const startTime = performance.now();
-    const minDisplayTime = 2500; // Increased minimum display time
-    const maxWaitTime = 25000;   // Increased maximum wait time to 25 seconds
+    const minDisplayTime = 2000; // Minimum time to show loader (2 seconds)
+    const maxWaitTime = 10000;   // Maximum time to wait before hiding loader (10 seconds)
     
-    // Tracking variables
-    let loadedImages = 0;
-    let totalImages = 0;
-    let lazyImagesFound = 0;
-    let lazyImagesLoaded = 0;
+    // Keep track of loading status
     let hasHiddenLoader = false;
+    let imagesLoaded = 0;
+    let imagesTotal = 0;
     
-    // Find all images (both regular and lazysizes)
-    const regularImages = Array.from(document.querySelectorAll('img:not(.lazyload):not([data-src])'));
-    const lazyImages = Array.from(document.querySelectorAll('img.lazyload, img[data-src]'));
+    // Find all images on the page (both regular and those with data-src attributes)
+    const allImages = document.querySelectorAll('img');
+    const lazyloadImages = document.querySelectorAll('img.lazyload, img[data-src]');
     
-    // Initial count
-    totalImages = regularImages.length + lazyImages.length;
-    console.log(`Initial count: ${totalImages} images (${regularImages.length} regular, ${lazyImages.length} lazy)`);
+    // Count only visible images
+    imagesTotal = Array.from(allImages).filter(img => {
+        // Filter out very small images (like tracking pixels)
+        return !img.classList.contains('hidden') && 
+               (img.width > 1 || img.height > 1 || 
+                img.getAttribute('width') > 1 || 
+                img.getAttribute('height') > 1);
+    }).length;
     
-    // Ensure we have a minimum number of images to track
-    if (totalImages < 2) {
-        totalImages = 2; // Set a minimum threshold
+    // Ensure we have at least some images to wait for
+    if (imagesTotal === 0) {
+        imagesTotal = 1; // Set a minimum so we don't divide by zero
     }
     
-    // Loader hide function with checks
-    function attemptToHideLoader() {
-        if (hasHiddenLoader) return; // Prevent multiple calls
-        
-        const elapsedTime = performance.now() - startTime;
-        const allRegularLoaded = loadedImages >= regularImages.length;
-        const allLazyHandled = lazyImagesLoaded >= lazyImagesFound;
-        const minTimeElapsed = elapsedTime >= minDisplayTime;
-        
-        // Debug output
-        console.log(`Progress: ${loadedImages}/${regularImages.length} regular, ${lazyImagesLoaded}/${lazyImagesFound} lazy, elapsed: ${Math.round(elapsedTime)}ms`);
-        
-        // Only hide when conditions are met
-        if ((allRegularLoaded && allLazyHandled && minTimeElapsed) || elapsedTime >= maxWaitTime) {
-            hideLoader();
-        }
-    }
+    console.log(`Found ${imagesTotal} images to load (${lazyloadImages.length} lazy images)`);
     
-    // Actually hide the loader
+    // Function to hide loader
     function hideLoader() {
         if (hasHiddenLoader || !loader) return;
         
         hasHiddenLoader = true;
         console.log('Hiding loader');
         
+        // Add transition class
         loader.classList.add('loaded');
         document.body.classList.add('content-loaded');
         
-        // Remove loader from DOM after transition completes
+        // Remove loader from DOM after transition
         setTimeout(() => {
             if (loader && loader.parentNode) {
                 loader.parentNode.removeChild(loader);
@@ -1624,81 +1612,69 @@
         }, 500);
     }
     
-    // Handle regular image loading
-    regularImages.forEach(img => {
-        if (img.complete) {
-            loadedImages++;
-            console.log(`Regular image already loaded: ${img.src || 'no-src'}`);
-        } else {
-            img.addEventListener('load', () => {
-                loadedImages++;
-                console.log(`Regular image loaded: ${img.src || 'no-src'}`);
-                attemptToHideLoader();
-            });
-            img.addEventListener('error', () => {
-                loadedImages++;
-                console.log(`Regular image error: ${img.src || 'no-src'}`);
-                attemptToHideLoader();
-            });
-        }
-    });
-    
-    // Track lazysizes events globally
-    document.addEventListener('lazybeforeunveil', function(e) {
-        if (e.target.tagName === 'IMG') {
-            lazyImagesFound++;
-            console.log(`Lazy image unveiled: ${e.target.dataset.src || 'no-data-src'}`);
-        }
-    });
-    
-    document.addEventListener('lazyloaded', function(e) {
-        if (e.target.tagName === 'IMG') {
-            lazyImagesLoaded++;
-            console.log(`Lazy image loaded: ${e.target.src || 'no-src'}`);
-            attemptToHideLoader();
-        }
-    });
-    
-    // Handle lazy image loading explicitly
-    lazyImages.forEach(img => {
-        img.addEventListener('load', () => {
-            console.log(`Lazy image direct load event: ${img.src || 'no-src'}`);
-            attemptToHideLoader();
-        });
-        img.addEventListener('error', () => {
-            console.log(`Lazy image direct error event: ${img.src || 'no-src'}`);
-            attemptToHideLoader();
-        });
-    });
-    
-    // Ensure loader hides even if something goes wrong
-    window.addEventListener('load', function() {
-        // Wait a bit longer after window load
-        setTimeout(() => {
-            if (!hasHiddenLoader) {
-                console.log('Fallback: Window load event triggered loader hide');
-                hideLoader();
-            }
-        }, 2000); // Wait 2 seconds after window load
-    });
-    
-    // Final fallback - maximum wait time
-    setTimeout(() => {
-        if (!hasHiddenLoader) {
-            console.log('Maximum wait time reached - forcing loader hide');
+    // Check if we should hide the loader
+    function checkLoaderStatus() {
+        const elapsedTime = performance.now() - startTime;
+        const loadRatio = imagesLoaded / imagesTotal;
+        
+        console.log(`Progress: ${imagesLoaded}/${imagesTotal} images loaded (${Math.round(loadRatio * 100)}%), elapsed: ${Math.round(elapsedTime)}ms`);
+        
+        // Hide loader if:
+        // 1. Minimum display time has elapsed AND at least 80% of images are loaded
+        // 2. OR maximum wait time has been reached
+        if ((elapsedTime >= minDisplayTime && loadRatio >= 0.8) || elapsedTime >= maxWaitTime) {
             hideLoader();
         }
-    }, maxWaitTime);
-    
-    // Check initial state
-    if (regularImages.length > 0 && regularImages.every(img => img.complete)) {
-        console.log('All regular images already loaded');
-        loadedImages = regularImages.length;
     }
     
-    // Initial check in case everything is already loaded
-    setTimeout(attemptToHideLoader, 100);
-});
+    // Track all regular images
+    allImages.forEach(img => {
+        if (img.complete && img.naturalWidth !== 0) {
+            imagesLoaded++;
+        } else {
+            img.addEventListener('load', () => {
+                imagesLoaded++;
+                checkLoaderStatus();
+            });
+            img.addEventListener('error', () => {
+                imagesLoaded++;
+                console.log(`Image error: ${img.src || img.dataset.src || 'unknown'}`);
+                checkLoaderStatus();
+            });
+        }
+    });
+    
+    // Special handling for lazy-loaded images
+    document.addEventListener('lazyloaded', () => {
+        // We don't increment imagesLoaded here since those events are already
+        // captured by the image load listeners above
+        checkLoaderStatus();
+    });
+    
+    // Force lazy-load images to load sooner
+    if (window.lazySizes) {
+        setTimeout(() => {
+            window.lazySizes.autoSizer.checkElems();
+        }, 500);
+    }
+    
+    // Window load event - most resources should be loaded
+    window.addEventListener('load', () => {
+        // Give a small buffer after load event before checking
+        setTimeout(checkLoaderStatus, 500);
+    });
+    
+    // Initial check
+    checkLoaderStatus();
+    
+    // Fallbacks
+    setTimeout(checkLoaderStatus, 1000);  // Check after 1 second
+    setTimeout(checkLoaderStatus, 2500);  // Check after 2.5 seconds
+    setTimeout(checkLoaderStatus, 5000);  // Check after 5 seconds
+    
+    // Final fallback - force loader to hide after maxWaitTime
+    setTimeout(hideLoader, maxWaitTime);
+});A
     </script>
 </body>
 
