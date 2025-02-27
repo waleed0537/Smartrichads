@@ -1562,37 +1562,119 @@
             });
         });
         document.addEventListener('DOMContentLoaded', function() {
-    // Get the loader element
+    // Loader elements
     const loader = document.getElementById('page-loader');
+    const startTime = performance.now();
+    const minDisplayTime = 2000; // Minimum time to show loader (2 seconds)
+    const maxWaitTime = 10000;   // Maximum time to wait before hiding loader (10 seconds)
     
-    // Set a fixed timeout of 7 seconds
-    const loaderTimeout = 7000; // 7 seconds
+    // Keep track of loading status
+    let hasHiddenLoader = false;
+    let imagesLoaded = 0;
+    let imagesTotal = 0;
     
-    // Function to hide the loader
+    // Find all images on the page (both regular and those with data-src attributes)
+    const allImages = document.querySelectorAll('img');
+    const lazyloadImages = document.querySelectorAll('img.lazyload, img[data-src]');
+    
+    // Count only visible images
+    imagesTotal = Array.from(allImages).filter(img => {
+        // Filter out very small images (like tracking pixels)
+        return !img.classList.contains('hidden') && 
+               (img.width > 1 || img.height > 1 || 
+                img.getAttribute('width') > 1 || 
+                img.getAttribute('height') > 1);
+    }).length;
+    
+    // Ensure we have at least some images to wait for
+    if (imagesTotal === 0) {
+        imagesTotal = 1; // Set a minimum so we don't divide by zero
+    }
+    
+    console.log(`Found ${imagesTotal} images to load (${lazyloadImages.length} lazy images)`);
+    
+    // Function to hide loader
     function hideLoader() {
-        if (!loader) return;
+        if (hasHiddenLoader || !loader) return;
         
-        // Add the loaded class to trigger the CSS transition
+        hasHiddenLoader = true;
+        console.log('Hiding loader');
+        
+        // Add transition class
         loader.classList.add('loaded');
         document.body.classList.add('content-loaded');
         
-        // Remove the loader from DOM after transition completes
+        // Remove loader from DOM after transition
         setTimeout(() => {
             if (loader && loader.parentNode) {
                 loader.parentNode.removeChild(loader);
             }
-        }, 500); // 500ms for the transition to complete
+        }, 500);
     }
     
-    // Hide loader after the fixed timeout
-    setTimeout(hideLoader, loaderTimeout);
+    // Check if we should hide the loader
+    function checkLoaderStatus() {
+        const elapsedTime = performance.now() - startTime;
+        const loadRatio = imagesLoaded / imagesTotal;
+        
+        console.log(`Progress: ${imagesLoaded}/${imagesTotal} images loaded (${Math.round(loadRatio * 100)}%), elapsed: ${Math.round(elapsedTime)}ms`);
+        
+        // Hide loader if:
+        // 1. Minimum display time has elapsed AND at least 80% of images are loaded
+        // 2. OR maximum wait time has been reached
+        if ((elapsedTime >= minDisplayTime && loadRatio >= 0.8) || elapsedTime >= maxWaitTime) {
+            hideLoader();
+        }
+    }
     
-    // Also listen for window load event as a fallback
-    window.addEventListener('load', function() {
-        // If the timer hasn't finished yet, let it continue
-        // This is just a fallback in case the timeout fails
+    // Track all regular images
+    allImages.forEach(img => {
+        if (img.complete && img.naturalWidth !== 0) {
+            imagesLoaded++;
+        } else {
+            img.addEventListener('load', () => {
+                imagesLoaded++;
+                checkLoaderStatus();
+            });
+            img.addEventListener('error', () => {
+                imagesLoaded++;
+                console.log(`Image error: ${img.src || img.dataset.src || 'unknown'}`);
+                checkLoaderStatus();
+            });
+        }
     });
-});
+    
+    // Special handling for lazy-loaded images
+    document.addEventListener('lazyloaded', () => {
+        // We don't increment imagesLoaded here since those events are already
+        // captured by the image load listeners above
+        checkLoaderStatus();
+    });
+    
+    // Force lazy-load images to load sooner
+    if (window.lazySizes) {
+        setTimeout(() => {
+            window.lazySizes.autoSizer.checkElems();
+        }, 500);
+    }
+    
+    // Window load event - most resources should be loaded
+    window.addEventListener('load', () => {
+        // Give a small buffer after load event before checking
+        setTimeout(checkLoaderStatus, 500);
+    });
+    
+    // Initial check
+    checkLoaderStatus();
+    
+    // Fallbacks
+    setTimeout(checkLoaderStatus, 1000);  // Check after 1 second
+    setTimeout(checkLoaderStatus, 2500);  // Check after 2.5 seconds
+    setTimeout(checkLoaderStatus, 5000);  // Check after 5 seconds
+    
+    // Final fallback - force loader to hide after maxWaitTime
+    setTimeout(hideLoader, maxWaitTime);
+});A
     </script>
 </body>
 
