@@ -11,574 +11,944 @@
     <link rel="stylesheet" href="/css/create-campaign.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Loading button styles */
-        .submit-button {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .submit-button .button-text {
-            transition: opacity 0.3s ease;
-        }
-
-        .submit-button .loader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .submit-button.loading .button-text {
-            opacity: 0;
-        }
-
-        .submit-button.loading .loader {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loader-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Improved mobile sidebar styles */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 240px;
-                height: 100%;
-                position: fixed;
-                top: 0;
-                left: -240px;
-                z-index: 1000;
-                transition: transform 0.3s ease;
-                overflow-y: auto;
-                box-shadow: none;
-            }
-
-            .sidebar.active {
-                transform: translateX(240px);
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            }
-
-            .mobile-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.3s ease, visibility 0.3s ease;
-            }
-
-            .mobile-overlay.active {
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .nav-menu {
-                padding-top: 60px;
-            }
-
-            .close-menu {
-                position: absolute;
-                top: 15px;
-                right: 15px;
-                background: none;
-                border: none;
-                font-size: 1.2rem;
-                color: #6b7280;
-                cursor: pointer;
-                padding: 5px;
-                z-index: 1001;
-                display: block;
-            }
-
-            .top-nav {
-                padding-left: 60px;
-            }
-
-            .mobile-menu-toggle {
-                position: fixed;
-                top: 15px;
-                left: 15px;
-                z-index: 990;
-                background: rgba(255, 255, 255, 0.9);
-                border: none;
-                border-radius: 5px;
-                width: 40px;
-                height: 40px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.2rem;
-                color: #374151;
-                cursor: pointer;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            }
-        }
-
-        .mobile-menu-toggle {
-    z-index: 1010; /* Increased z-index to be higher than notification */
-    position: fixed;
-    display: none; /* Hidden by default on desktop */
+    /* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-        .date-filter {
-            position: relative;
-            display: inline-block;
-        }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f9fafb;
+    color: #111827;
+    overflow-x: hidden;
+}
 
-        .date-filter-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 0.375rem;
-            color: #374151;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+body.overflow-hidden {
+    overflow: hidden;
+}
 
-        .date-filter-btn:hover {
-            background: #e5e7eb;
-        }
+/* === DASHBOARD LAYOUT === */
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
 
-        .payment-notification {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            width: 100%;
-            position: relative;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1005;
-            animation: slideDown 0.5s ease-in-out;
-        }
+/* === SIDEBAR STYLES === */
+.sidebar {
+    width: 280px;
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+}
 
-        .payment-notification.pending {
-            background-color: #FFF7E0;
-            border-bottom: 1px solid #F0D68A;
-            color: #8C6C15;
-        }
+.sidebar-header {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb;
+}
 
-        .payment-notification.approved {
-            background-color: #E6F7E9;
-            border-bottom: 1px solid #A2D9AC;
-            color: #1F7D32;
-        }
+.logo {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #6d28d9;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        .payment-notification.rejected {
-            background-color: #FEEBEC;
-            border-bottom: 1px solid #F1A5A5;
-            color: #B42929;
-        }
+.close-menu {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1.25rem;
+    display: none;
+}
 
-        .notification-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
+.nav-menu {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+    overflow-y: auto;
+}
 
-        .notification-icon {
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.nav-menu ul {
+    list-style: none;
+    padding: 0 1rem;
+}
 
-        .notification-message {
-            font-size: 14px;
-            font-weight: 500;
-        }
+.nav-menu ul li {
+    margin: 0.5rem 0;
+}
 
-        .notification-close {
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: inherit;
-            opacity: 0.7;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.2s, opacity 0.2s;
-        }
+.nav-menu ul li a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
 
-        .notification-close:hover {
-            opacity: 1;
-            background-color: rgba(0, 0, 0, 0.05);
-        }
+.nav-menu ul li.active a {
+    background-color: rgba(109, 40, 217, 0.1);
+    color: #6d28d9;
+}
 
-        .notification-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.nav-menu ul li a:hover {
+    background-color: rgba(109, 40, 217, 0.05);
+    color: #5b21b6;
+}
 
-        .notification-action-btn {
-            padding: 5px 10px;
-            font-size: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            background-color: rgba(255, 255, 255, 0.7);
-        }
+.nav-menu ul li a i {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
 
-        .pending .notification-action-btn {
-            color: #8C6C15;
-            border: 1px solid #F0D68A;
-        }
+.nav-menu ul li.active a i,
+.nav-menu ul li a:hover i {
+    color: #6d28d9;
+}
 
-        .pending .notification-action-btn:hover {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+.logout-section {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
 
-        .approved .notification-action-btn {
-            color: #1F7D32;
-            border: 1px solid #A2D9AC;
-        }
+.logout-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #ef4444;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+    font-weight: 500;
+}
 
-        .approved .notification-action-btn:hover {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+.logout-link:hover {
+    background-color: rgba(239, 68, 68, 0.05);
+}
 
-        .rejected .notification-action-btn {
-            color: #B42929;
-            border: 1px solid #F1A5A5;
-        }
+.logout-link i {
+    width: 1.25rem;
+    text-align: center;
+}
 
-        .rejected .notification-action-btn:hover {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+/* === MAIN CONTENT === */
+.main-content {
+    flex-grow: 1;
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
+}
 
-        @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
+/* === TOP NAVIGATION === */
+.top-nav {
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
 
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+.top-nav h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+}
 
-        /* Adjust content-area padding when notification is visible */
-        .content-area.with-notification {
-            padding-top: 0;
-        }
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-        .date-picker-popup {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            left: 0;
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 1rem;
-            min-width: 320px;
-            z-index: 50;
-            border: 1px solid #e5e7eb;
-        }
+.balance {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
 
-        .date-picker-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+.balance-label {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
 
-        .date-picker-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+.balance-amount {
+    font-weight: 600;
+}
 
-        .date-picker-group label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-        }
+.add-funds-button {
+    background-color: #6d28d9;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
 
-        .date-picker-group input {
-            padding: 0.5rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-        }
+.add-funds-button:hover {
+    background-color: #5b21b6;
+}
 
-        .date-picker-group input:focus {
-            outline: none;
-            border-color: #6d28d9;
-            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
-        }
+.icon-button {
+    background: none;
+    border: none;
+    color: #6b7280;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s;
+}
 
-        .date-picker-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e5e7eb;
-        }
+.icon-button:hover {
+    background-color: #f3f4f6;
+}
 
-        .cancel-btn {
-            padding: 0.5rem 1rem;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 0.375rem;
-            color: #374151;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+/* === MOBILE MENU TOGGLE === */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1010;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 5px;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #374151;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
-        .cancel-btn:hover {
-            background: #e5e7eb;
-        }
+/* === MOBILE OVERLAY === */
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1007;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
 
-        .apply-btn {
-            padding: 0.5rem 1rem;
-            background: #6d28d9;
-            border: none;
-            border-radius: 0.375rem;
-            color: white;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+.mobile-overlay.active {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}
 
-        .apply-btn:hover {
-            background: #5b21b6;
-        }
+/* === CONTENT AREA === */
+.content-area {
+    padding: 1.5rem;
+    flex-grow: 1;
+    position: relative;
+}
 
-        @media (max-width: 768px) {
-            .mobile-menu-toggle {
-                display: flex;
-                /* Show only on mobile */
-                position: fixed;
-                top: 1rem;
-                left: 1rem;
-                z-index: 1000;
-                background: #ffffff;
-                border: none;
-                padding: 0.5rem;
-                border-radius: 0.375rem;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
+.content-area.with-notification {
+    padding-top: 0;
+}
 
-            /* Keep existing mobile sidebar styles */
-            .sidebar {
-        z-index: 1008; /* Higher than notification but lower than toggle button */
+/* === PAYMENT NOTIFICATION === */
+.payment-notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    width: 100%;
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1005;
+    animation: slideDown 0.5s ease-in-out;
+}
+
+.payment-notification.pending {
+    background-color: #FFF7E0;
+    border-bottom: 1px solid #F0D68A;
+    color: #8C6C15;
+}
+
+.payment-notification.approved {
+    background-color: #E6F7E9;
+    border-bottom: 1px solid #A2D9AC;
+    color: #1F7D32;
+}
+
+.payment-notification.rejected {
+    background-color: #FEEBEC;
+    border-bottom: 1px solid #F1A5A5;
+    color: #B42929;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.notification-icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-message {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notification-close {
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.notification-close:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-action-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.pending .notification-action-btn {
+    color: #8C6C15;
+    border: 1px solid #F0D68A;
+}
+
+.pending .notification-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.approved .notification-action-btn {
+    color: #1F7D32;
+    border: 1px solid #A2D9AC;
+}
+
+.approved .notification-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.rejected .notification-action-btn {
+    color: #B42929;
+    border: 1px solid #F1A5A5;
+}
+
+.rejected .notification-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* === EMPTY STATE === */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    max-width: 400px;
+    margin: 4rem auto;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.megaphone-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    padding: 0.75rem;
+    background-color: #fee2e2;
+    border-radius: 50%;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-state h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+}
+
+.empty-state p {
+    color: #6b7280;
+}
+
+/* === PAYMENT FORM === */
+.payment-form {
+    max-width: 600px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.payment-form.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.payment-form-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.payment-form-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.payment-form-content {
+    padding: 2rem;
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.payment-method {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.payment-method.active {
+    border-color: #6d28d9;
+    background-color: #f0f0ff;
+    color: #6d28d9;
+}
+
+.payment-method i {
+    font-size: 1.25rem;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #6d28d9;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* === SUBMIT BUTTON WITH LOADING STATE === */
+.submit-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #6d28d9;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-button:hover {
+    background-color: #5b21b6;
+}
+
+.submit-button .button-text {
+    transition: opacity 0.3s ease;
+}
+
+.submit-button .loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.submit-button.loading .button-text {
+    opacity: 0;
+}
+
+.submit-button.loading .loader {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loader-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.payment-status-label {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: none;
+}
+
+.payment-status-label.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+    display: block;
+}
+
+.payment-status-label.error {
+    background-color: #f2dede;
+    color: #a94442;
+    display: block;
+}
+
+/* === DATE PICKER === */
+.date-filter {
+    position: relative;
+    display: inline-block;
+}
+
+.date-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 0.375rem;
+    color: #374151;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.date-filter-btn:hover {
+    background: #e5e7eb;
+}
+
+.date-picker-popup {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 1rem;
+    min-width: 320px;
+    z-index: 50;
+    border: 1px solid #e5e7eb;
+}
+
+.date-picker-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.date-picker-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.date-picker-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.date-picker-group input {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.date-picker-group input:focus {
+    outline: none;
+    border-color: #6d28d9;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+}
+
+.date-picker-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.cancel-btn {
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 0.375rem;
+    color: #374151;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+    background: #e5e7eb;
+}
+
+.apply-btn {
+    padding: 0.5rem 1rem;
+    background: #6d28d9;
+    border: none;
+    border-radius: 0.375rem;
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.apply-btn:hover {
+    background: #5b21b6;
+}
+
+/* === VERIFICATION CONTAINER === */
+.verification-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f9fafb;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.verification-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 0.375rem;
+    color: #374151;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background: #e5e7eb;
+}
+
+.verification-text {
+    color: #6b7280;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.verification-text a {
+    color: #6d28d9;
+    text-decoration: none;
+}
+
+.verification-text a:hover {
+    text-decoration: underline;
+}
+
+.status-box {
+    background: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 2rem 0;
+}
+
+.status-text {
+    color: #6d28d9;
+    font-weight: 500;
+}
+
+.questions-box {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.questions-box h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 1rem;
+}
+
+.questions-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.questions-box li {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.questions-box li::before {
+    content: "•";
+    color: #6d28d9;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* === UTILITY CLASSES === */
+.hidden {
+    display: none !important;
+}
+
+/* === RESPONSIVE STYLES === */
+@media (max-width: 768px) {
+    /* Mobile sidebar styles */
+    .sidebar {
         width: 240px;
-        transform: translateX(-100%);
+        height: 100%;
         position: fixed;
         top: 0;
-        left: 0;
-        height: 100%;
+        left: -240px;
+        z-index: 1008;
+        transition: transform 0.3s ease;
         overflow-y: auto;
+        box-shadow: none;
     }
-    .mobile-overlay {
-        z-index: 1007;
+
+    .sidebar.active {
+        transform: translateX(240px);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
     }
-    
-    /* Adjust padding for the top nav to account for the toggle button */
+
+    .close-menu {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.2rem;
+        z-index: 1001;
+    }
+
+    .nav-menu {
+        padding-top: 60px;
+    }
+
+    /* Mobile menu toggle */
+    .mobile-menu-toggle {
+        display: flex;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1010;
+    }
+
+    /* Main content adjustment */
+    .main-content {
+        margin-left: 0;
+    }
+
+    /* Top navigation adjustment */
     .top-nav {
         padding-left: 60px;
     }
-    
-    /* Fix notification to ensure it doesn't push content */
+
+    /* Notification adjustments */
     .payment-notification {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
     }
-    
-    /* Adjust content area when notification is visible */
-    .content-area.with-notification {
-        padding-top: 60px; /* Add padding to account for fixed notification */
+
+    .notification-message {
+        font-size: 12px;
     }
-            .sidebar.active {
-                transform: translateX(0);
-            }
 
-            .date-picker-popup {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 90%;
-                max-width: 320px;
-            }
+    .notification-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
 
-            .notification-message {
-                font-size: 12px;
-            }
+    /* Content area adjustment when notification is active */
+    .content-area.with-notification {
+        padding-top: 60px;
+    }
 
-            .notification-actions {
-                flex-direction: column;
-                gap: 5px;
-            }
-        }
+    /* Date picker adjustment for mobile */
+    .date-picker-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 320px;
+    }
 
-        .hidden {
-            display: none;
-        }
+    /* Form adjustments */
+    .payment-form {
+        margin: 1rem;
+    }
 
-        .verification-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #f9fafb;
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 2rem;
-        }
+    .payment-form-content {
+        padding: 1rem;
+    }
 
-        .verification-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
 
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 0.375rem;
-            color: #374151;
-            font-size: 0.875rem;
-            cursor: pointer;
-            margin-bottom: 2rem;
-            transition: background-color 0.2s;
-        }
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 
-        .back-button:hover {
-            background: #e5e7eb;
-        }
+    /* Verification container adjustments */
+    .verification-container {
+        padding: 1rem;
+    }
 
-        h1 {
-            font-size: 1.875rem;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 1.5rem;
-        }
+    .verification-content {
+        padding: 1rem;
+    }
 
-        .verification-text {
-            color: #6b7280;
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        .verification-text a {
-            color: #6d28d9;
-            text-decoration: none;
-        }
-
-        .verification-text a:hover {
-            text-decoration: underline;
-        }
-
-        .status-box {
-            background: #f3f4f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 2rem 0;
-        }
-
-        .status-text {
-            color: #6d28d9;
-            font-weight: 500;
-        }
-
-        .questions-box {
-            background: #f9fafb;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-        }
-
-        .questions-box h2 {
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 1rem;
-        }
-
-        .questions-box ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .questions-box li {
-            color: #6b7280;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .questions-box li::before {
-            content: "•";
-            color: #6d28d9;
-            font-weight: bold;
-            margin-right: 0.5rem;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .verification-container {
-                padding: 1rem;
-            }
-
-            .verification-content {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-        }
+    h1 {
+        font-size: 1.5rem;
+    }
+}
     </style>
     <script src="../backend/auth-handler.js"></script>
 </head>
@@ -589,10 +959,15 @@
         <button class="mobile-menu-toggle" aria-label="Toggle menu" onclick="toggleSidebar()">
             <i class="fa-solid fa-bars"></i>
         </button>
+        <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
         <!-- Left Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
-            <div>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Richads</span>
+                </div>
                 <button class="close-menu" onclick="toggleSidebar()">
                     <i class="fa-solid fa-times"></i>
                 </button>
@@ -601,46 +976,44 @@
             <nav class="nav-menu">
                 <ul>
                     <li class="active">
-                        <a href="#offers">
+                        <a href="#offers" onclick="setActiveNavItem(this)">
                             <i class="fa-solid fa-box"></i>
                             <span>Offers</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#statistics">
+                        <a href="#statistics" onclick="setActiveNavItem(this)">
                             <i class="fa-solid fa-chart-line"></i>
                             <span>Statistics</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#add-funds" onclick="togglePaymentForm()">
+                        <a href="#add-funds" onclick="togglePaymentForm(); setActiveNavItem(this)">
                             <i class="fa-solid fa-wallet"></i>
                             <span>Add Funds</span>
                         </a>
                     </li>
-
                     <li>
-                        <a href="#finances">
+                        <a href="#finances" onclick="showSection('financesSection'); setActiveNavItem(this)">
                             <i class="fa-solid fa-coins"></i>
                             <span>Finances</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#campaigns" onclick="showSection('campaignsSection')">
+                        <a href="#campaigns" onclick="showSection('campaignsSection'); setActiveNavItem(this)">
                             <i class="fa-solid fa-bullhorn"></i>
                             <span>Campaigns</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#create-campaign" class="nav-link"
-                            onclick="showSection('createCampaignSection'); return false;">
+                        <a href="#create-campaign"
+                            onclick="showSection('createCampaignSection'); setActiveNavItem(this)">
                             <i class="fa-solid fa-plus"></i>
                             <span>Create Campaign</span>
                         </a>
                     </li>
-
                     <li>
-                        <a href="#settings">
+                        <a href="#settings" onclick="setActiveNavItem(this)">
                             <i class="fa-solid fa-gear"></i>
                             <span>Settings</span>
                         </a>
@@ -1119,30 +1492,60 @@
         // Toggle sidebar function
         function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
     
-    if (sidebar) {
+    if (sidebar && mobileOverlay) {
         sidebar.classList.toggle('active');
+        mobileOverlay.classList.toggle('active');
         
-        // Handle mobile overlay
-        let overlay = document.getElementById('mobileOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'mobileOverlay';
-            overlay.className = 'mobile-overlay';
-            overlay.onclick = function() {
-                toggleSidebar(); // Close sidebar when overlay is clicked
-            };
-            document.body.appendChild(overlay);
-        }
-        
-        // Toggle overlay active state
-        if (sidebar.classList.contains('active')) {
-            overlay.classList.add('active');
-        } else {
-            overlay.classList.remove('active');
-        }
+        // Prevent body scrolling when sidebar is open on mobile
+        document.body.classList.toggle('overflow-hidden');
     }
 }
+function setActiveNavItem(element) {
+    // Remove active class from all nav items
+    document.querySelectorAll('.nav-menu li').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Add active class to clicked item's parent li
+    if (element) {
+        const parentLi = element.closest('li');
+        if (parentLi) {
+            parentLi.classList.add('active');
+        }
+    }
+    
+    // Close sidebar on mobile after selection
+    if (window.innerWidth <= 768) {
+        toggleSidebar();
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click event listener to all nav items
+    document.querySelectorAll('.nav-menu li a').forEach(item => {
+        item.addEventListener('click', function(event) {
+            // Prevent default if needed
+            if (this.getAttribute('href').startsWith('#')) {
+                event.preventDefault();
+            }
+            
+            // Handle section navigation if needed
+            const sectionId = this.getAttribute('href').substring(1);
+            if (sectionId && typeof showSection === 'function' && 
+                ['financesSection', 'campaignsSection', 'createCampaignSection'].includes(sectionId + 'Section')) {
+                showSection(sectionId + 'Section');
+            }
+        });
+    });
+    
+    // Set initial active state based on current URL hash
+    const currentHash = window.location.hash || '#offers';
+    const activeLink = document.querySelector(`.nav-menu li a[href="${currentHash}"]`);
+    if (activeLink) {
+        setActiveNavItem(activeLink);
+    }
+});
         // Show section function
         function showSection(sectionId) {
             const sections = [
@@ -1448,75 +1851,75 @@
 
         // Show payment notification
         function showPaymentNotification(status, amount) {
-    // Only show notifications for approved or rejected status, not pending
-    if (status === 'pending') return;
-    
-    const notification = document.getElementById('paymentNotification');
-    const message = document.getElementById('notificationMessage');
-    const actions = document.getElementById('notificationActions');
-    const contentArea = document.getElementById('contentArea');
-    
-    // Remove previous status classes
-    notification.classList.remove('pending', 'approved', 'rejected');
-    
-    // Add new status class
-    notification.classList.add(status);
-    
-    // Clear previous actions
-    actions.innerHTML = '';
-    
-    // Set notification message based on status
-    switch(status) {
-        case 'approved':
-            message.innerHTML = `Your payment of <strong>${formatCurrency(amount)}</strong> has been approved! Your funds are now available.`;
-            
-            // Add view balance button if needed
-            const balanceBtn = document.createElement('button');
-           
-            actions.appendChild(balanceBtn);
-            break;
-            
-        case 'rejected':
-            message.innerHTML = `Your payment of <strong>${formatCurrency(amount)}</strong> was rejected. Please contact support for assistance.`;
-            
-            // Add try again button
-            const tryAgainBtn = document.createElement('button');
-            tryAgainBtn.className = 'notification-action-btn';
-            tryAgainBtn.textContent = 'Try Again';
-            tryAgainBtn.onclick = function() {
-                togglePaymentForm();
-            };
-            actions.appendChild(tryAgainBtn);
-            
-            // Add contact support button
-            const supportBtn = document.createElement('button');
-            supportBtn.className = 'notification-action-btn';
-            supportBtn.textContent = 'Contact Support';
-            supportBtn.onclick = function() {
-                // Would open support contact form or chat
-                alert('Support contact functionality would open here');
-            };
-            actions.appendChild(supportBtn);
-            break;
-    }
-    
-    // Show notification
-    notification.classList.remove('hidden');
-    
-    // Adjust content area padding
-    contentArea.classList.add('with-notification');
-    
-    // Store current status in localStorage for persistence
-    localStorage.setItem('notificationStatus', status);
-    localStorage.setItem('notificationAmount', amount);
-    
-    // Auto-hide approved notifications after 24 hours
-    if (status === 'approved') {
-        setTimeout(() => {
-            closeNotification();
-        }, 24 * 60 * 60 * 1000); // 24 hours
-    }
-}
+            // Only show notifications for approved or rejected status, not pending
+            if (status === 'pending') return;
+
+            const notification = document.getElementById('paymentNotification');
+            const message = document.getElementById('notificationMessage');
+            const actions = document.getElementById('notificationActions');
+            const contentArea = document.getElementById('contentArea');
+
+            // Remove previous status classes
+            notification.classList.remove('pending', 'approved', 'rejected');
+
+            // Add new status class
+            notification.classList.add(status);
+
+            // Clear previous actions
+            actions.innerHTML = '';
+
+            // Set notification message based on status
+            switch (status) {
+                case 'approved':
+                    message.innerHTML = `Your payment of <strong>${formatCurrency(amount)}</strong> has been approved! Your funds are now available.`;
+
+                    // Add view balance button if needed
+                    const balanceBtn = document.createElement('button');
+
+                    actions.appendChild(balanceBtn);
+                    break;
+
+                case 'rejected':
+                    message.innerHTML = `Your payment of <strong>${formatCurrency(amount)}</strong> was rejected. Please contact support for assistance.`;
+
+                    // Add try again button
+                    const tryAgainBtn = document.createElement('button');
+                    tryAgainBtn.className = 'notification-action-btn';
+                    tryAgainBtn.textContent = 'Try Again';
+                    tryAgainBtn.onclick = function () {
+                        togglePaymentForm();
+                    };
+                    actions.appendChild(tryAgainBtn);
+
+                    // Add contact support button
+                    const supportBtn = document.createElement('button');
+                    supportBtn.className = 'notification-action-btn';
+                    supportBtn.textContent = 'Contact Support';
+                    supportBtn.onclick = function () {
+                        // Would open support contact form or chat
+                        alert('Support contact functionality would open here');
+                    };
+                    actions.appendChild(supportBtn);
+                    break;
+            }
+
+            // Show notification
+            notification.classList.remove('hidden');
+
+            // Adjust content area padding
+            contentArea.classList.add('with-notification');
+
+            // Store current status in localStorage for persistence
+            localStorage.setItem('notificationStatus', status);
+            localStorage.setItem('notificationAmount', amount);
+
+            // Auto-hide approved notifications after 24 hours
+            if (status === 'approved') {
+                setTimeout(() => {
+                    closeNotification();
+                }, 24 * 60 * 60 * 1000); // 24 hours
+            }
+        }
 
         // Close notification
         function closeNotification() {

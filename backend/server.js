@@ -468,20 +468,55 @@ app.patch('/api/admin/payments/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Payment not found' });
         }
 
-        // Optional: Send notification email about payment status
+        // Fetch the user to get their email
+        const user = await User.findById(payment.user);
+        
+        if (!user) {
+            console.error('User not found for payment ID:', id);
+            return res.status(404).json({ message: 'User associated with payment not found' });
+        }
+
+        // Send notification email directly to the user
         const mailOptions = {
             from: 'smartrichads@gmail.com',
-            to: 'payments@smartrichads.com', // Or fetch user's email from payment record
-            subject: `Payment ${status.toUpperCase()}`,
+            to: user.email,
+            subject: `Your Payment Request has been ${status.charAt(0).toUpperCase() + status.slice(1)}`,
             html: `
                 <h3>Payment ${status.toUpperCase()}</h3>
-                <p>Payment of $${payment.amount} has been ${status}.</p>
+                <p>Dear ${user.name},</p>
+                <p>Your payment request of $${payment.amount.toFixed(2)} has been <strong>${status}</strong>.</p>
                 <p>Payment Method: ${payment.paymentMethod}</p>
+                <p>Date Submitted: ${new Date(payment.createdAt).toLocaleString()}</p>
+                ${status === 'approved' ? 
+                '<p>The funds will be available in your account shortly.</p>' : 
+                '<p>If you have any questions about why your payment was rejected, please contact our support team at <a href="mailto:support@smartrichads.com">support@smartrichads.com</a>.</p>'
+                }
+                <p>Thank you for using Richads!</p>
+                <p>Best regards,<br>The Richads Team</p>
+            `
+        };
+
+        // Send a copy to the admin team
+        const adminMailOptions = {
+            from: 'smartrichads@gmail.com',
+            to: 'payments@smartrichads.com',
+            subject: `Payment ${status.toUpperCase()} - ID: ${payment._id}`,
+            html: `
+                <h3>Payment ${status.toUpperCase()}</h3>
+                <p>Payment of $${payment.amount.toFixed(2)} for user ${user.name} (${user.email}) has been ${status}.</p>
+                <p>Payment Method: ${payment.paymentMethod}</p>
+                <p>Payment ID: ${payment._id}</p>
+                <p>User ID: ${user._id}</p>
+                <p>Date Submitted: ${new Date(payment.createdAt).toLocaleString()}</p>
+                <p>Date ${status.charAt(0).toUpperCase() + status.slice(1)}: ${new Date().toLocaleString()}</p>
             `
         };
 
         try {
+            // Send both emails
             await transporter.sendMail(mailOptions);
+            await transporter.sendMail(adminMailOptions);
+            console.log(`Payment status notification sent to user: ${user.email}`);
         } catch (emailError) {
             console.error('Error sending notification email:', emailError);
         }
